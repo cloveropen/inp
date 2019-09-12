@@ -1,19 +1,21 @@
 <template>
-  <v-app id="inp.cloveropen.com">
-    <Basepage />
+  <v-app id="outp.cloveropen.com">
+    <Basepage />    
     <v-container fluid fill-height>
       <v-layout justify-start>
-        <v-img :src="require('../assets/main_bg.jpg')" />
+        <test />
       </v-layout>
     </v-container>
   </v-app>
 </template>
 
 <script>
-import Basepage from '../components/Basepage';
+import Basepage from "../components/Basepage";
+import test from "../components/HelloWorld";
 export default {
   components: {
-    Basepage
+    Basepage,
+    test
   }
 };
 </script>
