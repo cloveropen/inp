@@ -3,7 +3,7 @@
     <Basepage />    
     <v-container fluid fill-height>
       <v-layout justify-start>
-        <test />
+        <dischargec />
       </v-layout>
     </v-container>
   </v-app>
@@ -11,11 +11,11 @@
 
 <script>
 import Basepage from "../components/Basepage";
-import test from "../components/HelloWorld";
+import dischargec from "../components/dischargec";
 export default {
   components: {
     Basepage,
-    test
+    dischargec
   }
 };
 </script>
