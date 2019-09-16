@@ -3,7 +3,7 @@
     <Basepage />    
     <v-container fluid fill-height>
       <v-layout justify-start>
-        <test />
+        <adm_regc />
       </v-layout>
     </v-container>
   </v-app>
@@ -11,11 +11,11 @@
 
 <script>
 import Basepage from "../components/Basepage";
-import test from "../components/HelloWorld";
+import adm_regc from "../components/adm_regc";
 export default {
   components: {
     Basepage,
-    test
+    adm_regc
   }
 };
 </script>
