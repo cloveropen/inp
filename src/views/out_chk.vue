@@ -3,7 +3,7 @@
     <Basepage />    
     <v-container fluid fill-height>
       <v-layout justify-start>
-        <test />
+        <out_chkc />
       </v-layout>
     </v-container>
   </v-app>
@@ -11,11 +11,11 @@
 
 <script>
 import Basepage from "../components/Basepage";
-import test from "../components/HelloWorld";
+import out_chkc from "../components/out_chkc";
 export default {
   components: {
     Basepage,
-    test
+    out_chkc
   }
 };
 </script>
