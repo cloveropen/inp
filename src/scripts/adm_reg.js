@@ -1,12 +1,13 @@
 //-------------------------获取患者类别-----------------------------------------------------------
-export function getpatient_type() {
+export function getpatient_type(topcode, tgc) {
   let patient_types = Array.of(); //患者类别列表
-  let turl = process.env.VUE_APP_REG_URL + "/searchdicthealthterm/per_cate";
-  fetch_data_api(turl, "get").then(data => {
-    for (let i = 0; i < data.length; i++) {
+  let turl = process.env.VUE_APP_INP_URL + "/searchdicthealthterm/per_cate/" + topcode + "/" + tgc;
+  fetch_data_api(turl).then(data => {
+    let tjson_obj = JSON.parse(data);
+    for (let i = 0; i < tjson_obj.length; i++) {      
       patient_types.splice(i, 0, {
-        "item-value": data[i].termId,
-        "item-text": data[i].termName
+        "item-value": tjson_obj[i].termId,
+        "item-text": tjson_obj[i].termName        
       });
     }
     return patient_types;
@@ -15,14 +16,15 @@ export function getpatient_type() {
 }
 
 //---------------------------------------获取性别列表----------------------------------------------
-export function getgender() {
+export function getgender(topcode, tgc) {
   let genders = Array.of(); //性别列表
-  let turl = process.env.VUE_APP_REG_URL + "/searchdicthealthterm/gender_type";
-  fetch_data_api(turl, "get").then(data => {
-    for (let i = 0; i < data.length; i++) {
+  let turl = process.env.VUE_APP_INP_URL + "/searchdicthealthterm/gender_type/" + topcode + "/" + tgc;
+  fetch_data_api(turl).then(data => {
+    let tjson_obj = JSON.parse(data);
+    for (let i = 0; i < tjson_obj.length; i++) {
       genders.splice(i, 0, {
-        "item-value": data[i].termId,
-        "item-text": data[i].termName
+        "item-value": tjson_obj[i].termId,
+        "item-text": tjson_obj[i].termName
       });
     }
     return genders;
@@ -31,14 +33,15 @@ export function getgender() {
 }
 
 //---------------------------查询身份证件类型列表--------------------------------------------------
-export function getid_type() {
+export function getid_type(topcode, tgc) {
   let idcard_types = Array.of(); //身份证件类型
-  let turl = process.env.VUE_APP_REG_URL + "/searchdicthealthterm/id_type";
-  fetch_data_api(turl, "get").then(data => {
-    for (let i = 0; i < data.length; i++) {
+  let turl = process.env.VUE_APP_INP_URL + "/searchdicthealthterm/id_type/" + topcode + "/" + tgc;
+  fetch_data_api(turl).then(data => {
+    let tjson_obj = JSON.parse(data);
+    for (let i = 0; i < tjson_obj.length; i++) {
       idcard_types.splice(i, 0, {
-        "item-value": data[i].termId,
-        "item-text": data[i].termName
+        "item-value": tjson_obj[i].termId,
+        "item-text": tjson_obj[i].termName
       });
     }
     return idcard_types;
@@ -52,111 +55,101 @@ export function get_regopcode() {
   if (!user) {
     return this.$parent.$router.push({ path: "/login" });
   }
-  return user.opid;
+  return user.opid + "|" + user.tgc;
 }
-
-//----------------------------查询挂号类别列表------------------------------------------------------
-export function getreg_type() {
-  let reg_types = Array.of(); //挂号类别
-  let turl = process.env.VUE_APP_REG_URL + "/searchdictregitem/0";
-  fetch_data_api(turl, "get").then(data => {
-    for (let i = 0; i < data.length; i++) {
-      reg_types.splice(i, 0, {
-        "item-value": data[i].itemCode,
-        "item-text": data[i].itemName
+//----------------------------查询入院医疗类别列表------------------------------------------------------
+export function getin_type(topcode, tgc) {
+  let in_types = Array.of(); //身份证件类型
+  let turl = process.env.VUE_APP_INP_URL + "/searchdicthealthterm/in_type/" + topcode + "/" + tgc;
+  fetch_data_api(turl).then(data => {
+    let tjson_obj = JSON.parse(data);
+    for (let i = 0; i < tjson_obj.length; i++) {
+      in_types.splice(i, 0, {
+        "item-value": tjson_obj[i].termId,
+        "item-text": tjson_obj[i].termName
       });
     }
-    return reg_types;
+    return in_types;
   });
-  return reg_types;
+  return in_types;
 }
-
-//----------------------------查询指定挂号类别的挂号费------------------------------------------------------
-export async function getregprice(treg_type) {
-  let treg_price = Array.of();
-  await fetch(
-    process.env.VUE_APP_REG_URL + "/searchdictregitemprice/" + treg_type,
-    {
-      method: "get",
-      headers: {
-        Accept: "text/html",
-        "Content-Type": "application/json"
-      }
+//---------------------------查询民族-------------------------------------------------------------------
+export function getnation(topcode, tgc) {
+  let nations = Array.of(); 
+  let turl = process.env.VUE_APP_INP_URL + "/searchdicthealthterm/nation/" + topcode + "/" + tgc;
+  fetch_data_api(turl).then(data => {
+    let tjson_obj = JSON.parse(data);
+    for (let i = 0; i < tjson_obj.length; i++) {
+      nations.splice(i, 0, {
+        "item-value": tjson_obj[i].termId,
+        "item-text": tjson_obj[i].termName
+      });
     }
-  )
-    .then(function(response) {
-      if (response.ok) {
-        // window.alert("---ok=");
-      } else {
-        window.alert("获取指定挂号类别的挂号费失败error" + response.text);
-      }
-      return response.json();
-    })
-    .then(function(data) {
-      let tresultCode = data.resultCode;
-      if (tresultCode === "0") {
-        let objdata = JSON.parse(data.outdata);
-        treg_price = [objdata[0].refPrice, objdata[0].realPrice];
-        console.log("treg_price=" + JSON.stringify(treg_price));
-        //return treg_price;
-      } else {
-        window.alert("获取指定挂号类别的挂号费失败1" + data.errorMsg);
-        return treg_price;
-      }
-    })
-    .catch(function(err) {
-      window.alert("获取指定挂号类别的挂号费查询error=" + err);
-      return treg_price;
-    });
-  return treg_price;
+    return nations;
+  });
+  return nations;
 }
 
+//---------------------------查询家庭成员关系------------------------------------------------------------------
+export function getliaison_rels(topcode, tgc) {
+  let liaison_rels = Array.of(); //身份证件类型
+  let turl = process.env.VUE_APP_INP_URL + "/searchdicthealthterm/family_rel/" + topcode + "/" + tgc;
+  fetch_data_api(turl).then(data => {
+    let tjson_obj = JSON.parse(data);
+    for (let i = 0; i < tjson_obj.length; i++) {
+      liaison_rels.splice(i, 0, {
+        "item-value": tjson_obj[i].termId,
+        "item-text": tjson_obj[i].termName
+      });
+    }
+    return liaison_rels;
+  });
+  return liaison_rels;
+}
 //-------------------------------------查询科室列表------------------------------------------------------
-export function getdept_codes() {
+export function getdept_codes(topcode, tgc) {
   let dept_codes = Array.of(); //科室列表
-  let turl = process.env.VUE_APP_REG_URL + "/searchdictdepartment/clinical";
-  fetch_data_api(turl, "get").then(data => {
-    for (let i = 0; i < data.length; i++) {
+  let turl = process.env.VUE_APP_INP_URL + "/searchdictdepartment/clinical/" + topcode + "/" + tgc;
+  fetch_data_api(turl).then(data => {
+    let tjson_obj = JSON.parse(data);
+    for (let i = 0; i < tjson_obj.length; i++) {
       dept_codes.splice(i, 0, {
-        "item-value": data[i].deptCode,
-        "item-text": data[i].deptName
+        "item-value": tjson_obj[i].deptCode,
+        "item-text": tjson_obj[i].deptName
       });
     }
     return dept_codes;
   });
   return dept_codes;
 }
-
 //----------------------------------------查询本科室可以挂号的专家列表---------------------------------------------------
-export function getdoctor_codes(tdept_code, tpost_tech) {
+export function getdoctor_codes(tdept_code, tpost_tech, topcode, tgc) {
   let doctor_codes = Array.of(); //专家列表
-  let turl =
-    process.env.VUE_APP_REG_URL +
-    "/searchdictpersonreg/" +
-    tdept_code +
-    "/" +
-    tpost_tech;
-  fetch_data_api(turl, "get").then(data => {
-    for (let i = 0; i < data.length; i++) {
+  let turl = process.env.VUE_APP_INP_URL + "/searchdictpersonreg/" + tdept_code + "/" + tpost_tech + "/";
+  topcode + "/" + tgc;
+  fetch_data_api(turl).then(data => {
+    let tjson_obj = JSON.parse(data);
+    for (let i = 0; i < tjson_obj.length; i++) {
       doctor_codes.splice(i, 0, {
-        "item-value": data[i].personId,
-        "item-text": data[i].personName
+        "item-value": tjson_obj[i].personId,
+        "item-text": tjson_obj[i].personName
       });
     }
     return doctor_codes;
   });
   return doctor_codes;
 }
-
 //------------------获取省份列表---------------------------
-export function getprovs() {
+export function getprovs(topcode, tgc) {
   let addr_provs = Array.of(); //患者类别列表
-  let turl = process.env.VUE_APP_REG_URL + "/searchdictprov";
-  fetch_data_api(turl, "get").then(data => {
-    for (let i = 0; i < data.length; i++) {
+  let turl = process.env.VUE_APP_INP_URL + "/searchdictprov/" + topcode + "/" + tgc;
+  fetch_data_api(turl).then(data => {
+    console.log("getprovs="+data)
+    let tjson_obj = JSON.parse(data);
+    for (let i = 0; i < tjson_obj.length; i++) {
       addr_provs.splice(i, 0, {
-        "item-value": data[i].provinceId,
-        "item-text": data[i].name
+        "item-value": tjson_obj[i].provinceId,
+        "item-text": tjson_obj[i].name
       });
     }
     return addr_provs;
@@ -165,14 +158,16 @@ export function getprovs() {
 }
 
 //------------------获取指定省份的市列表---------------------------
-export function getcitys(tprovid) {
+export function getcitys(tprovid, topcode, tgc) {
   let addr_citys = Array.of(); //市列表
-  let turl = process.env.VUE_APP_REG_URL + "/searchdictcity/" + tprovid;
-  fetch_data_api(turl, "get").then(data => {
-    for (let i = 0; i < data.length; i++) {
+  let turl = process.env.VUE_APP_INP_URL + "/searchdictcity/" + tprovid + "/" + topcode + "/" + tgc;
+  fetch_data_api(turl).then(data => {
+    console.log("getcitys="+data)
+    let tjson_obj = JSON.parse(data);
+    for (let i = 0; i < tjson_obj.length; i++) {
       addr_citys.splice(i, 0, {
-        "item-value": data[i].cityId,
-        "item-text": data[i].name
+        "item-value": tjson_obj[i].cityId,
+        "item-text": tjson_obj[i].name
       });
     }
     return addr_citys;
@@ -181,14 +176,15 @@ export function getcitys(tprovid) {
 }
 
 //------------------获取指定市的区县列表---------------------------
-export function getcountys(tcityid) {
+export function getcountys(tcityid, topcode, tgc) {
   let addr_countys = Array.of(); //指定市的区县列表
-  let turl = process.env.VUE_APP_REG_URL + "/searchdictcounty/" + tcityid;
-  fetch_data_api(turl, "get").then(data => {
-    for (let i = 0; i < data.length; i++) {
+  let turl = process.env.VUE_APP_INP_URL + "/searchdictcounty/" + tcityid + "/" + topcode + "/" + tgc;
+  fetch_data_api(turl).then(data => {
+    let tjson_obj = JSON.parse(data);
+    for (let i = 0; i < tjson_obj.length; i++) {
       addr_countys.splice(i, 0, {
-        "item-value": data[i].countryId,
-        "item-text": data[i].name
+        "item-value": tjson_obj[i].countryId,
+        "item-text": tjson_obj[i].name
       });
     }
     return addr_countys;
@@ -197,14 +193,15 @@ export function getcountys(tcityid) {
 }
 
 //------------------获取指定区县的街道列表---------------------------
-export function getstreets(tcountyid) {
+export function getstreets(tcountyid, topcode, tgc) {
   let addr_townships = Array.of(); //指定区县的街道列表
-  let turl = process.env.VUE_APP_REG_URL + "/searchdictstreet/" + tcountyid;
-  fetch_data_api(turl, "get").then(data => {
-    for (let i = 0; i < data.length; i++) {
+  let turl = process.env.VUE_APP_INP_URL + "/searchdictstreet/" + tcountyid + "/" + topcode + "/" + tgc;
+  fetch_data_api(turl).then(data => {
+    let tjson_obj = JSON.parse(data);
+    for (let i = 0; i < tjson_obj.length; i++) {
       addr_townships.splice(i, 0, {
-        "item-value": data[i].townId,
-        "item-text": data[i].name
+        "item-value": tjson_obj[i].townId,
+        "item-text": tjson_obj[i].name
       });
     }
     return addr_townships;
@@ -212,124 +209,6 @@ export function getstreets(tcountyid) {
   return addr_townships;
 }
 
-//----------------------医保读卡------------------------------------------------------------------
-export function readcard_mi() {
-  // this.$refs.form.resetValidation();
-  window.alert("医保读卡");
-  return "医保读卡";
-}
-
-//----------------------------查询患者主索引信息------------------------------------------------------
-export async function getpatient(texpid) {
-  let toutreg = {};
-  await fetch(process.env.VUE_APP_REG_URL + "/searchoutregexpid/" + texpid, {
-    method: "get",
-    headers: {
-      Accept: "text/html",
-      "Content-Type": "application/json"
-    }
-  })
-    .then(function(response) {
-      if (response.ok) {
-        // window.alert("---ok=");
-      } else {
-        window.alert("查询患者主索引信息失败error" + response.text);
-      }
-      return response.json();
-    })
-    .then(function(data) {
-      let tresultCode = data.resultCode;
-      if (tresultCode === "0") {
-        toutreg = JSON.parse(data.outdata);
-        //console.log("toutreg=" + JSON.stringify(toutreg));
-        //return toutreg;
-      } else {
-        window.alert("查询患者主索引信息失败1" + data.errorMsg);
-        return toutreg;
-      }
-    })
-    .catch(function(err) {
-      window.alert("查询患者主索引信息查询error=" + err);
-      return toutreg;
-    });
-  return toutreg;
-}
-
-//------------------------确认现金挂号------------------------------------------------------------
-export async function outreg_cash(tout_reg) {
-  let tpid = "";
-  console.log("JSON.stringify(tout_reg)=" + JSON.stringify(tout_reg));
-  await fetch(process.env.VUE_APP_REG_URL + "/saveoutreg", {
-    method: "post",
-    // credentials: "include", // send cookies
-    // mode: 'cors',
-    body: JSON.stringify(tout_reg),
-    headers: {
-      Accept: "application/json, text/plain, */*",
-      "Content-Type": "application/json"
-    }
-  })
-    .then(function(response) {
-      if (response.ok) {
-        //window.alert('ok');
-      } else {
-        window.alert("确认现金挂号查询失败error");
-      }
-      return response.json();
-    })
-    .then(function(data) {
-      let tresultCode = data.resultCode;
-      if (tresultCode === "0") {
-        //现金挂号按钮disable
-        //window.alert("现金挂号完成" + data.outdata);
-        tpid = data.outdata;
-        //打印挂号单
-      } else {
-        //登录失败
-        window.alert("确认现金挂号失败1");
-      }
-    })
-    .catch(function(err) {
-      window.alert("确认现金挂号error=" + err);
-    });
-  return await tpid;
-}
-
-//------------------------上传挂号照片------------------------------------------------------------
-export function outreg_pic(tout_reg_pic) {
-  //console.log("JSON.stringify(tout_reg_pic)=" + JSON.stringify(tout_reg_pic));
-  fetch(process.env.VUE_APP_REG_URL + "/saveoutregpic", {
-    method: "post",
-    body: JSON.stringify(tout_reg_pic),
-    headers: {
-      Accept: "application/json, text/plain, */*",
-      "Content-Type": "application/json"
-    }
-  })
-    .then(function(response) {
-      if (response.ok) {
-        //window.alert('ok');
-      } else {
-        window.alert("上传挂号照片失败error");
-      }
-      return response.json();
-    })
-    .then(function(data) {
-      let tresultCode = data.resultCode;
-      if (tresultCode === "0") {
-        //现金挂号按钮disable
-        window.alert("上传挂号照片完成" + data.outdata);
-        //打印挂号单
-      } else {
-        //登录失败
-        window.alert("上传挂号照片失败1");
-      }
-    })
-    .catch(function(err) {
-      window.alert("上传挂号照片error=" + err);
-    });
-  return "";
-}
 //------------------------确认微信挂号------------------------------------------------------------
 export function outreg_weixin() {
   //console.log(this.$refs.form.data);
@@ -345,7 +224,7 @@ export function sch_weixin() {
 
 // -------------------------------------------------------------------------------------------------------------------------------------------
 //---公用后台获取数据接口---------------------------------------
-async function fetch_data_api(turl, tmethod) {
+/*async function fetch_data_api(turl, tmethod) {
   let ret_data;
   await fetch(turl, {
     method: tmethod,
@@ -381,4 +260,44 @@ async function fetch_data_api(turl, tmethod) {
     });
   //console.log("ret_data="+JSON.stringify(ret_data));
   return await ret_data;
+}*/
+//---公用后台获取数据接口--------------------------------------
+export async function fetch_data_api(turl) {
+  try {
+    let response = await fetch(turl, {
+      method: "get",
+      headers: {
+        Accept: "text/html",
+        "Content-Type": "application/json"
+      }
+    });
+    let data = await response.json();
+
+    if (data.resultCode == "0") {
+      return data.outdata;
+    } else {
+      console.log("查询失败:" + data.errorMsg);
+      return "";
+    }
+  } catch (err) {
+    console.error(err);
+    // Handle errors here
+  }
+}
+
+export async function post_cash_async(turl, tbody) {
+  try {
+    let response = await fetch(turl, {
+      method: "post",
+      body: tbody,
+      headers: {
+        Accept: "text/html",
+        "Content-Type": "application/json"
+      }
+    });
+    return await response.json();
+  } catch (err) {
+    console.error(err);
+    // Handle errors here
+  }
 }

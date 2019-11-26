@@ -95,12 +95,6 @@ export const router = new Router({
         import(/* webpackChunkName: "pat_detail_day" */ "../views/pat_detail_day.vue")
     },
     {
-      path: "/pat_detail_day",
-      name: "pat_detail_day",
-      component: () =>
-        import(/* webpackChunkName: "pat_detail_day" */ "../views/pat_detail_day.vue")
-    },
-    {
       path: "/detail_op",
       name: "detail_op",
       component: () =>

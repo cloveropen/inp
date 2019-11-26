@@ -20,27 +20,15 @@
             <v-container>
               <v-layout>
                 <v-flex xs12 md4>
-                  <v-text-field
-                    v-model="username"
-                    :rules="nameRules"
-                    :counter="4"
-                    label="用户编码"
-                    required
-                  ></v-text-field>
+                  <v-text-field v-model="username" :rules="nameRules" :counter="4" label="用户编码" required></v-text-field>
                 </v-flex>
 
                 <v-flex xs12 md4>
-                  <v-text-field
-                    v-model="passwd"
-                    :rules="passRules"
-                    label="密码"
-                    required
-                    type="password"
-                  ></v-text-field>
+                  <v-text-field v-model="passwd" :rules="passRules" label="密码" required type="password"></v-text-field>
                 </v-flex>
 
                 <v-flex xs12 md4>
-                  <v-btn color="success" :disabled="!valid" @click="loginSubmit">登录</v-btn>                
+                  <v-btn color="success" :disabled="!valid" @click="loginSubmit">登录</v-btn>
                 </v-flex>
               </v-layout>
             </v-container>
@@ -55,17 +43,11 @@
 export default {
   data: () => ({
     valid: false,
-    username: "",
-    passwd: "",
+    username: "8888",
+    passwd: "eastwill",
     loginmsg: "",
-    nameRules: [
-      v => !!v || "用户编码不能为空",
-      v => v.length >= 3 || "用户编码长度必须超过3个字符"
-    ],
-    passRules: [
-      v => !!v || "用户密码不能为空",
-      v => v.length >= 6 || "用户密码长度必须超过6个字符"
-    ]
+    nameRules: [v => !!v || "用户编码不能为空", v => v.length >= 3 || "用户编码长度必须超过3个字符"],
+    passRules: [v => !!v || "用户密码不能为空", v => v.length >= 6 || "用户密码长度必须超过6个字符"]
   }),
   created() {
     localStorage.removeItem("user");
@@ -73,12 +55,7 @@ export default {
   methods: {
     loginSubmit() {
       // window.alert("username="+this.username+" passwd="+this.passwd+" |"+process.env.VUE_APP_LOGIN_URL);
-      let tinstr =
-        '{"opid":"' +
-        this.username +
-        '","opname":"","oppass":"' +
-        this.passwd +
-        '","opstatus":""}';
+      let tinstr = '{"opid":"' + this.username + '","opname":"","oppass":"' + this.passwd + '","opstatus":""}';
       let sel = this;
       fetch(process.env.VUE_APP_LOGIN_URL, {
         method: "post",
@@ -106,9 +83,34 @@ export default {
             // this.loginmsg = "";
             //sel.$parent.$router.push({ path: "/" });
             sel.$parent.$router.push({ path: "/" });
+            // 提交保存登录凭证数据
+            data.hsp_code = process.env.VUE_APP_HSP_CODE;
+            var date = new Date();
+            data.valid_time = date.toUTCString();
+            // -----------------------------------------------------------------------------------------------
+            fetch(process.env.VUE_APP_LOGINREC_URL + "/savetgc", {
+              method: "POST", // or 'PUT'
+              body: JSON.stringify(data), // data can be `string` or {object}!
+              headers: {
+                "Content-Type": "application/json"
+              }
+            })
+              .then(function(response) {
+                if (response.ok) {
+                  //window.alert('ok');
+                } else {
+                  window.alert("登录失败error");
+                  sel.loginmsg = "登录失败" + response.err;
+                }
+                return response.json();
+              })
+              .then(function(data) {
+                console.log("保存成功=" + JSON.stringify(data));
+              });
+            // ------------------------------------------------------------------------------------------------
           } else {
             //登录失败
-            window.alert("登录失败!\n体验请使用:\n  用户编码8888,密码eastwill");
+            window.alert("登录失败!\n");
             sel.loginmsg = "登录失败";
             localStorage.removeItem("user");
           }
