@@ -204,21 +204,17 @@ import {
   getpatient_type,
   get_regopcode,
   getgender,
-  getid_type,
-  getreg_type,
+  getnation,
+  getin_type,
+  getliaison_rels,
   getdept_codes,
   getdoctor_codes,
   getprovs,
   getcitys,
   getcountys,
   getstreets,
-  getpatient,
-  readcard_mi,
-  outreg_cash,
-  outreg_weixin,
-  outreg_pic,
-  sch_weixin,
-  getregprice
+  getin_status,
+  getin_purpose
 } from "../scripts/adm_reg.js";
 
 export default {
@@ -407,8 +403,6 @@ export default {
     this.out_reg.regOpcode = get_regopcode();
     this.patient_types = getpatient_type();
     this.genders = getgender();
-    this.idcard_types = getid_type();
-    this.reg_types = getreg_type();
     this.dept_codes = getdept_codes();
     this.addr_provs = getprovs();
     this.addr_citys = getcitys(process.env.VUE_APP_HSP_PROV);
@@ -462,17 +456,15 @@ export default {
         this.out_reg_pic.healthId = this.out_reg.healthId;
         this.out_reg_pic.micard = this.out_reg.micard;
         this.out_reg_pic.captureOpid = this.out_reg.regOpcode;
-        outreg_pic(this.out_reg_pic);
+        //outreg_pic(this.out_reg_pic);
       });
       
     },
     outregweixinClicked(e) {
       console.log("e=" + e.target.innerText);
-      outreg_weixin();
     },
     schweixinClicked(e) {
       console.log("e=" + e.target.innerText);
-      sch_weixin();
     },
     dept_codeChanged(e) {
       let tdept_code = this.out_reg.deptCode;
@@ -481,12 +473,7 @@ export default {
       this.doctor_codes = getdoctor_codes(tdept_code, tpost_tech);
     },
     reg_typeChanged(e) {
-      console.log("reg_typeChanged e=" + e);
-      let treg_type = this.out_reg.regType;
-      getregprice(treg_type).then(data => {
-        this.out_reg.regPrice = data[0];
-        this.out_reg.checkPrice = data[1];
-      });
+      console.log("reg_typeChanged e=" + e);      
     },
     //------------------获取指定省份的市列表---------------------------
     prov_Changed() {

@@ -194,7 +194,6 @@
                 label="住院科室"
                 hide-details
                 prepend-icon="group_work"
-                single-line
                 required
                 @input="dept_codeChanged($event)"
               ></v-select>
@@ -203,86 +202,90 @@
               &emsp;&emsp;
               <v-select
                 v-model="admin_reg.doctor_out"
-                :items="dept_codes"
+                :items="doctor_codes"
                 item-text="item-text"
                 item-value="item-value"
                 :rules="[v => !!v || '收治医生不能为空']"
                 label="收治医生"
                 hide-details
                 prepend-icon="group_work"
-                single-line
                 required
                 @input="dept_codeChanged($event)"
               ></v-select>
             </v-flex>
             <v-flex d-flex>
               &emsp;&emsp;
-              <v-select
+              <v-autocomplete
                 v-model="admin_reg.diag_id"
-                :items="dept_codes"
+                :loading="loading"
+                :items="items_diag1"
                 item-text="item-text"
                 item-value="item-value"
-                :rules="[v => !!v || '入院诊断']"
-                label="入院诊断"
+                :search-input.sync="search_diag1"
+                cache-items
+                flat
+                hide-no-data
                 hide-details
-                prepend-icon="group_work"
-                single-line
-                required
-                @input="dept_codeChanged($event)"
-              ></v-select>
+                label="入院第一诊断"
+                hint="请输入两个以上的诊断关键字"
+              ></v-autocomplete>
             </v-flex>
             <v-flex d-flex>
               &emsp;&emsp;
-              <v-select
+              <v-autocomplete
                 v-model="admin_reg.diag_id2"
-                :items="dept_codes"
+                :loading="loading"
+                :items="items_diag2"
                 item-text="item-text"
                 item-value="item-value"
+                :search-input.sync="search_diag2"
+                cache-items
+                flat
+                hide-no-data
+                hide-details
                 label="入院第二诊断"
-                hide-details
-                prepend-icon="group_work"
-                single-line
-                @input="dept_codeChanged($event)"
-              ></v-select>
+                hint="请输入两个以上的诊断关键字"
+              ></v-autocomplete>
             </v-flex>
-            <v-flex d-flex>
+             <v-flex d-flex>
               &emsp;&emsp;
-              <v-select
+              <v-autocomplete
                 v-model="admin_reg.diag_id3"
-                :items="dept_codes"
+                :loading="loading"
+                :items="items_diag3"
                 item-text="item-text"
                 item-value="item-value"
-                label="入院第三诊断"
+                :search-input.sync="search_diag3"
+                cache-items
+                flat
+                hide-no-data
                 hide-details
-                prepend-icon="group_work"
-                single-line
-                @input="dept_codeChanged($event)"
-              ></v-select>
-            </v-flex>
+                label="入院第三诊断"
+                hint="请输入两个以上的诊断关键字"
+              ></v-autocomplete>
+            </v-flex>            
             <v-flex d-flex>
               &emsp;&emsp;
               <v-select
                 v-model="admin_reg.in_purpose"
-                :items="dept_codes"
+                :items="in_purposes"
                 item-text="item-text"
                 item-value="item-value"
                 label="入院原因"
                 hide-details
                 prepend-icon="group_work"
-                single-line
               ></v-select>
             </v-flex>
             <v-flex d-flex>
               &emsp;&emsp;
               <v-select
                 v-model="admin_reg.in_status"
-                :items="dept_codes"
+                :items="in_statuss"
                 item-text="item-text"
                 item-value="item-value"
                 label="病情状态"
                 hide-details
                 prepend-icon="group_work"
-                single-line
               ></v-select>
             </v-flex>
             <v-flex d-flex>
@@ -300,7 +303,7 @@
                 :items="dept_codes"
                 item-text="item-text"
                 item-value="item-value"
-                label="上一医院"
+                label="转入医院"
                 hide-details
                 prepend-icon="group_work"
                 single-line
@@ -440,7 +443,10 @@ import {
   getprovs,
   getcitys,
   getcountys,
-  getstreets
+  getstreets,
+  getin_status,
+  getin_purpose,
+  getdiag
 } from "../scripts/adm_reg.js";
 
 export default {
@@ -459,14 +465,15 @@ export default {
     idcard_types: [], //身份证件类型列表
     dept_codes: [], //就诊科室列表
     doctor_codes: [], //专家号专家列表
-    reg_types: [], //挂号类别
     addr_provs: [], //单位或住址(省份)
     addr_citys: [], //单位或住址(市)
     addr_countys: [], //单位或住址(区县)
     addr_townships: [], //单位或住址(街道)
     in_types: [], //入院医疗类别
     nations: [], //民族
-    liaison_rels: [], //联系人关系
+    liaison_rels: [], //联系人关系,
+    in_statuss: [], //入院病情状态
+    in_purposes: [], //入院原因
     admin_reg: {
       hsp_code: process.env.VUE_APP_HSP_CODE,
       pid: "",
@@ -556,7 +563,7 @@ export default {
     //captures: [],
     capture_num: 0,
 
-    search: "",
+    //search: "",
     headers: [
       {
         text: "姓名",
@@ -651,12 +658,18 @@ export default {
         protein: 7,
         iron: "6%"
       }
-    ]
+    ],
+    loading: false,
+    items_diag1: [],
+    items_diag2: [],
+    items_diag3: [],
+    search_diag1: null,
+    search_diag2: null,
+    search_diag3: null
   }),
   created() {
     this.topcode = get_regopcode().split("|")[0];
     this.tgc = get_regopcode().split("|")[1];
-    console.log("this.topcode=" + this.topcode + " this.tgc=" + this.tgc);
   },
   mounted() {
     this.patient_types = getpatient_type(this.topcode, this.tgc);
@@ -665,10 +678,13 @@ export default {
     this.in_types = getin_type(this.topcode, this.tgc);
     this.liaison_rels = getliaison_rels(this.topcode, this.tgc);
     this.dept_codes = getdept_codes(this.topcode, this.tgc);
+    // this.doctor_codes = getdoctor_codes(this.admin_reg.doctor_out,this.topcode, this.tgc);
     this.addr_provs = getprovs(this.topcode, this.tgc);
     this.addr_citys = getcitys(process.env.VUE_APP_HSP_PROV, this.topcode, this.tgc);
     this.addr_countys = getcountys(process.env.VUE_APP_HSP_CITY, this.topcode, this.tgc);
     this.addr_townships = getstreets(process.env.VUE_APP_HSP_COUNTY, this.topcode, this.tgc);
+    this.in_purposes = getin_purpose(this.topcode, this.tgc);
+    this.in_statuss = getin_status(this.topcode, this.tgc);
 
     this.video = this.$refs.video;
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -677,6 +693,17 @@ export default {
         this.video.play();
       });
     }
+  },
+  watch: {
+    search_diag1(val) {
+      val && val !== this.select && this.querySeldiag1s(val);
+    },
+    search_diag2(val) {
+      val && val !== this.select && this.querySeldiag2s(val);
+    },
+    search_diag3(val) {
+      val && val !== this.select && this.querySeldiag3s(val);
+    },
   },
   methods: {
     validate() {
@@ -689,6 +716,39 @@ export default {
     },
     resetValidation() {
       this.$refs.form.resetValidation();
+    },
+    querySeldiag1s(v) {
+      this.loading = true;
+      // console.log("v=" + v + "v.length=" + v.length);
+       if (v.length<2){
+         return ;
+      }
+      getdiag(v,this.topcode,this.tgc).then(data=>{
+        this.items_diag1 = data;
+      });
+      this.loading = false;
+    },
+    querySeldiag2s(v) {
+      this.loading = true;
+      // console.log("v=" + v + "v.length=" + v.length);
+       if (v.length<2){
+         return ;
+      }
+      getdiag(v,this.topcode,this.tgc).then(data=>{
+        this.items_diag2 = data;
+      });
+      this.loading = false;
+    },
+    querySeldiag3s(v) {
+      this.loading = true;
+      // console.log("v=" + v + "v.length=" + v.length);
+       if (v.length<2){
+         return ;
+      }
+      getdiag(v,this.topcode,this.tgc).then(data=>{
+        this.items_diag3 = data;
+      });
+      this.loading = false;
     },
     expidChanged(e) {
       let texpid = e;

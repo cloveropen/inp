@@ -106,11 +106,64 @@ export function getliaison_rels(topcode, tgc) {
   });
   return liaison_rels;
 }
+//---------------------------查询入院时情况------------------------------------------------------------------
+export function getin_status(topcode, tgc) {
+  let  in_statuss = Array.of(); //身份证件类型
+  let turl = process.env.VUE_APP_INP_URL + "/searchdicthealthterm/in_status/" + topcode + "/" + tgc;
+  fetch_data_api(turl).then(data => {
+    let tjson_obj = JSON.parse(data);
+    for (let i = 0; i < tjson_obj.length; i++) {
+      in_statuss.splice(i, 0, {
+        "item-value": tjson_obj[i].termId,
+        "item-text": tjson_obj[i].termName
+      });
+    }
+    return in_statuss;
+  });
+  return in_statuss;
+}
+//---------------------------查询住院原因------------------------------------------------------------------
+export function getin_purpose(topcode, tgc) {
+  let in_purposes = Array.of(); //身份证件类型
+  let turl = process.env.VUE_APP_INP_URL + "/searchdicthealthterm/in_purpose/" + topcode + "/" + tgc;
+  fetch_data_api(turl).then(data => {
+    let tjson_obj = JSON.parse(data);
+    for (let i = 0; i < tjson_obj.length; i++) {
+      in_purposes.splice(i, 0, {
+        "item-value": tjson_obj[i].termId,
+        "item-text": tjson_obj[i].termName
+      });
+    }
+    return in_purposes;
+  });
+  return in_purposes;
+}
+//---------------------------通过疾病名称关键字查询入院诊断------------------------------------------------------------------
+export async function getdiag(tdiagname,topcode, tgc) {
+  let tdiag_list = Array.of(); //诊断列表
+  let thsp_code = process.env.VUE_APP_HSP_CODE;
+  let turl = process.env.VUE_APP_INP_URL + "/searchdiagmi/%"+ tdiagname +"%/"
+      + thsp_code + "/" + topcode + "/" + tgc;
+  let tencode_url = encodeURI(turl);
+  await fetch_data_api(tencode_url).then(data => {
+    //console.log("getdiag data=" + data);
+    let tjson_obj = JSON.parse(data);
+    for (let i = 0; i < tjson_obj.length; i++) {
+      tdiag_list.splice(i, 0, {
+        "item-value": tjson_obj[i].icd_id,
+        "item-text": tjson_obj[i].icd_name
+      });
+    }
+    return tdiag_list;
+  });
+  return tdiag_list;
+}
 //-------------------------------------查询科室列表------------------------------------------------------
 export function getdept_codes(topcode, tgc) {
   let dept_codes = Array.of(); //科室列表
   let turl = process.env.VUE_APP_INP_URL + "/searchdictdepartment/clinical/" + topcode + "/" + tgc;
   fetch_data_api(turl).then(data => {
+    // console.log("getdept_codes data="+ data)
     let tjson_obj = JSON.parse(data);
     for (let i = 0; i < tjson_obj.length; i++) {
       dept_codes.splice(i, 0, {
@@ -125,7 +178,7 @@ export function getdept_codes(topcode, tgc) {
 //----------------------------------------查询本科室可以挂号的专家列表---------------------------------------------------
 export function getdoctor_codes(tdept_code, tpost_tech, topcode, tgc) {
   let doctor_codes = Array.of(); //专家列表
-  let turl = process.env.VUE_APP_INP_URL + "/searchdictpersonreg/" + tdept_code + "/" + tpost_tech + "/";
+  let turl = process.env.VUE_APP_INP_URL + "/searchdictperson/" + tdept_code + "/" + tpost_tech + "/";
   topcode + "/" + tgc;
   fetch_data_api(turl).then(data => {
     let tjson_obj = JSON.parse(data);
@@ -143,8 +196,7 @@ export function getdoctor_codes(tdept_code, tpost_tech, topcode, tgc) {
 export function getprovs(topcode, tgc) {
   let addr_provs = Array.of(); //患者类别列表
   let turl = process.env.VUE_APP_INP_URL + "/searchdictprov/" + topcode + "/" + tgc;
-  fetch_data_api(turl).then(data => {
-    console.log("getprovs="+data)
+  fetch_data_api(turl).then(data => {    
     let tjson_obj = JSON.parse(data);
     for (let i = 0; i < tjson_obj.length; i++) {
       addr_provs.splice(i, 0, {
@@ -162,7 +214,6 @@ export function getcitys(tprovid, topcode, tgc) {
   let addr_citys = Array.of(); //市列表
   let turl = process.env.VUE_APP_INP_URL + "/searchdictcity/" + tprovid + "/" + topcode + "/" + tgc;
   fetch_data_api(turl).then(data => {
-    console.log("getcitys="+data)
     let tjson_obj = JSON.parse(data);
     for (let i = 0; i < tjson_obj.length; i++) {
       addr_citys.splice(i, 0, {
