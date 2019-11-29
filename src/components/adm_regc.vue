@@ -423,10 +423,9 @@
     <v-card>
       <v-card-title>
         入院通知单列表
-        <div class="flex-grow-1"></div>
-        <v-text-field v-model="search" append-icon="search" label="按姓名查询" single-line hide-details></v-text-field>
+        <div class="flex-grow-1"></div>        
       </v-card-title>
-      <v-data-table :headers="headers" :items="desserts" :search="search"></v-data-table>
+      <v-data-table :headers="headers_pat_retain" :items="tpat_retain_lists"></v-data-table>
     </v-card>
   </v-container>
 </template>
@@ -446,7 +445,8 @@ import {
   getstreets,
   getin_status,
   getin_purpose,
-  getdiag
+  getdiag,
+  getpatretain
 } from "../scripts/adm_reg.js";
 
 export default {
@@ -563,102 +563,21 @@ export default {
     //captures: [],
     capture_num: 0,
 
-    //search: "",
-    headers: [
+    headers_pat_retain: [
       {
         text: "姓名",
         align: "left",
         sortable: false,
-        value: "name"
+        value: "patient_name"
       },
-      { text: "门诊号", value: "calories" },
-      { text: "申请时间", value: "fat" },
-      { text: "申请医师", value: "carbs" },
-      { text: "门急诊诊断", value: "protein" },
-      { text: "患者类型", value: "iron" }
+      { text: "门诊号", value: "pid" },
+      { text: "申请时间", value: "retain_time" },
+      { text: "申请医师", value: "retain_doctor" },
+      { text: "门急诊诊断", value: "diag_name" },
+      { text: "入院类别", value: "in_type" },
+      { text: "患者类型", value: "patient_type" }      
     ],
-    desserts: [
-      {
-        name: "Frozen Yogurt",
-        calories: 159,
-        fat: 6.0,
-        carbs: 24,
-        protein: 4.0,
-        iron: "1%"
-      },
-      {
-        name: "Ice cream sandwich",
-        calories: 237,
-        fat: 9.0,
-        carbs: 37,
-        protein: 4.3,
-        iron: "1%"
-      },
-      {
-        name: "Eclair",
-        calories: 262,
-        fat: 16.0,
-        carbs: 23,
-        protein: 6.0,
-        iron: "7%"
-      },
-      {
-        name: "Cupcake",
-        calories: 305,
-        fat: 3.7,
-        carbs: 67,
-        protein: 4.3,
-        iron: "8%"
-      },
-      {
-        name: "Gingerbread",
-        calories: 356,
-        fat: 16.0,
-        carbs: 49,
-        protein: 3.9,
-        iron: "16%"
-      },
-      {
-        name: "Jelly bean",
-        calories: 375,
-        fat: 0.0,
-        carbs: 94,
-        protein: 0.0,
-        iron: "0%"
-      },
-      {
-        name: "Lollipop",
-        calories: 392,
-        fat: 0.2,
-        carbs: 98,
-        protein: 0,
-        iron: "2%"
-      },
-      {
-        name: "Honeycomb",
-        calories: 408,
-        fat: 3.2,
-        carbs: 87,
-        protein: 6.5,
-        iron: "45%"
-      },
-      {
-        name: "Donut",
-        calories: 452,
-        fat: 25.0,
-        carbs: 51,
-        protein: 4.9,
-        iron: "22%"
-      },
-      {
-        name: "KitKat",
-        calories: 518,
-        fat: 26.0,
-        carbs: 65,
-        protein: 7,
-        iron: "6%"
-      }
-    ],
+    tpat_retain_lists: [],
     loading: false,
     items_diag1: [],
     items_diag2: [],
@@ -672,19 +591,39 @@ export default {
     this.tgc = get_regopcode().split("|")[1];
   },
   mounted() {
-    this.patient_types = getpatient_type(this.topcode, this.tgc);
-    this.genders = getgender(this.topcode, this.tgc);
-    this.nations = getnation(this.topcode, this.tgc);
-    this.in_types = getin_type(this.topcode, this.tgc);
-    this.liaison_rels = getliaison_rels(this.topcode, this.tgc);
-    this.dept_codes = getdept_codes(this.topcode, this.tgc);
+    getpatient_type(this.topcode, this.tgc).then(data=>{
+      this.patient_types = data;
+    });
+    getgender(this.topcode, this.tgc).then(data=>{
+      this.genders = data;
+    });
+    getnation(this.topcode, this.tgc).then(data=>{
+      this.nations = data;
+    });
+    getin_type(this.topcode, this.tgc).then(data=>{
+      this.in_types = data;
+    });
+    getliaison_rels(this.topcode, this.tgc).then(data=>{
+      this.liaison_rels = data;
+    });
+    getdept_codes(this.topcode, this.tgc).then(data=>{
+      this.dept_codes = data;
+    });
     // this.doctor_codes = getdoctor_codes(this.admin_reg.doctor_out,this.topcode, this.tgc);
     this.addr_provs = getprovs(this.topcode, this.tgc);
     this.addr_citys = getcitys(process.env.VUE_APP_HSP_PROV, this.topcode, this.tgc);
     this.addr_countys = getcountys(process.env.VUE_APP_HSP_CITY, this.topcode, this.tgc);
     this.addr_townships = getstreets(process.env.VUE_APP_HSP_COUNTY, this.topcode, this.tgc);
-    this.in_purposes = getin_purpose(this.topcode, this.tgc);
-    this.in_statuss = getin_status(this.topcode, this.tgc);
+    getin_purpose(this.topcode, this.tgc).then(data=>{
+       this.in_purposes = data;
+    });
+    getin_status(this.topcode, this.tgc).then(data=>{
+       this.in_statuss = data;
+    });
+    
+    getpatretain(this.topcode, this.tgc).then(data=>{
+       this.tpat_retain_lists = JSON.parse(data);
+    });
 
     this.video = this.$refs.video;
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -750,6 +689,7 @@ export default {
       });
       this.loading = false;
     },
+
     expidChanged(e) {
       let texpid = e;
       console.log("texpid e=" + e);

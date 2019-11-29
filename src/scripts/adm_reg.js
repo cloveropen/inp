@@ -1,8 +1,8 @@
 //-------------------------获取患者类别-----------------------------------------------------------
-export function getpatient_type(topcode, tgc) {
+export async function getpatient_type(topcode, tgc) {
   let patient_types = Array.of(); //患者类别列表
   let turl = process.env.VUE_APP_INP_URL + "/searchdicthealthterm/per_cate/" + topcode + "/" + tgc;
-  fetch_data_api(turl).then(data => {
+  await fetch_data_api(turl).then(data => {
     let tjson_obj = JSON.parse(data);
     for (let i = 0; i < tjson_obj.length; i++) {      
       patient_types.splice(i, 0, {
@@ -10,16 +10,14 @@ export function getpatient_type(topcode, tgc) {
         "item-text": tjson_obj[i].termName        
       });
     }
-    return patient_types;
   });
   return patient_types;
 }
-
 //---------------------------------------获取性别列表----------------------------------------------
-export function getgender(topcode, tgc) {
+export async function getgender(topcode, tgc) {
   let genders = Array.of(); //性别列表
   let turl = process.env.VUE_APP_INP_URL + "/searchdicthealthterm/gender_type/" + topcode + "/" + tgc;
-  fetch_data_api(turl).then(data => {
+  await fetch_data_api(turl).then(data => {
     let tjson_obj = JSON.parse(data);
     for (let i = 0; i < tjson_obj.length; i++) {
       genders.splice(i, 0, {
@@ -27,28 +25,9 @@ export function getgender(topcode, tgc) {
         "item-text": tjson_obj[i].termName
       });
     }
-    return genders;
   });
   return genders;
 }
-
-//---------------------------查询身份证件类型列表--------------------------------------------------
-export function getid_type(topcode, tgc) {
-  let idcard_types = Array.of(); //身份证件类型
-  let turl = process.env.VUE_APP_INP_URL + "/searchdicthealthterm/id_type/" + topcode + "/" + tgc;
-  fetch_data_api(turl).then(data => {
-    let tjson_obj = JSON.parse(data);
-    for (let i = 0; i < tjson_obj.length; i++) {
-      idcard_types.splice(i, 0, {
-        "item-value": tjson_obj[i].termId,
-        "item-text": tjson_obj[i].termName
-      });
-    }
-    return idcard_types;
-  });
-  return idcard_types;
-}
-
 //--------------------------查询操作员编号--------------------------------------------------------
 export function get_regopcode() {
   let user = JSON.parse(localStorage.getItem("user"));
@@ -58,10 +37,10 @@ export function get_regopcode() {
   return user.opid + "|" + user.tgc;
 }
 //----------------------------查询入院医疗类别列表------------------------------------------------------
-export function getin_type(topcode, tgc) {
+export async function getin_type(topcode, tgc) {
   let in_types = Array.of(); //身份证件类型
   let turl = process.env.VUE_APP_INP_URL + "/searchdicthealthterm/in_type/" + topcode + "/" + tgc;
-  fetch_data_api(turl).then(data => {
+  await fetch_data_api(turl).then(data => {
     let tjson_obj = JSON.parse(data);
     for (let i = 0; i < tjson_obj.length; i++) {
       in_types.splice(i, 0, {
@@ -69,15 +48,14 @@ export function getin_type(topcode, tgc) {
         "item-text": tjson_obj[i].termName
       });
     }
-    return in_types;
   });
   return in_types;
 }
 //---------------------------查询民族-------------------------------------------------------------------
-export function getnation(topcode, tgc) {
+export async function getnation(topcode, tgc) {
   let nations = Array.of(); 
   let turl = process.env.VUE_APP_INP_URL + "/searchdicthealthterm/nation/" + topcode + "/" + tgc;
-  fetch_data_api(turl).then(data => {
+  await fetch_data_api(turl).then(data => {
     let tjson_obj = JSON.parse(data);
     for (let i = 0; i < tjson_obj.length; i++) {
       nations.splice(i, 0, {
@@ -85,16 +63,14 @@ export function getnation(topcode, tgc) {
         "item-text": tjson_obj[i].termName
       });
     }
-    return nations;
   });
   return nations;
 }
-
 //---------------------------查询家庭成员关系------------------------------------------------------------------
-export function getliaison_rels(topcode, tgc) {
+export async function getliaison_rels(topcode, tgc) {
   let liaison_rels = Array.of(); //身份证件类型
   let turl = process.env.VUE_APP_INP_URL + "/searchdicthealthterm/family_rel/" + topcode + "/" + tgc;
-  fetch_data_api(turl).then(data => {
+  await fetch_data_api(turl).then(data => {
     let tjson_obj = JSON.parse(data);
     for (let i = 0; i < tjson_obj.length; i++) {
       liaison_rels.splice(i, 0, {
@@ -102,15 +78,14 @@ export function getliaison_rels(topcode, tgc) {
         "item-text": tjson_obj[i].termName
       });
     }
-    return liaison_rels;
   });
   return liaison_rels;
 }
 //---------------------------查询入院时情况------------------------------------------------------------------
-export function getin_status(topcode, tgc) {
+export async function getin_status(topcode, tgc) {
   let  in_statuss = Array.of(); //身份证件类型
   let turl = process.env.VUE_APP_INP_URL + "/searchdicthealthterm/in_status/" + topcode + "/" + tgc;
-  fetch_data_api(turl).then(data => {
+  await fetch_data_api(turl).then(data => {
     let tjson_obj = JSON.parse(data);
     for (let i = 0; i < tjson_obj.length; i++) {
       in_statuss.splice(i, 0, {
@@ -118,15 +93,14 @@ export function getin_status(topcode, tgc) {
         "item-text": tjson_obj[i].termName
       });
     }
-    return in_statuss;
   });
   return in_statuss;
 }
 //---------------------------查询住院原因------------------------------------------------------------------
-export function getin_purpose(topcode, tgc) {
+export async function getin_purpose(topcode, tgc) {
   let in_purposes = Array.of(); //身份证件类型
   let turl = process.env.VUE_APP_INP_URL + "/searchdicthealthterm/in_purpose/" + topcode + "/" + tgc;
-  fetch_data_api(turl).then(data => {
+  await fetch_data_api(turl).then(data => {
     let tjson_obj = JSON.parse(data);
     for (let i = 0; i < tjson_obj.length; i++) {
       in_purposes.splice(i, 0, {
@@ -134,7 +108,6 @@ export function getin_purpose(topcode, tgc) {
         "item-text": tjson_obj[i].termName
       });
     }
-    return in_purposes;
   });
   return in_purposes;
 }
@@ -158,11 +131,23 @@ export async function getdiag(tdiagname,topcode, tgc) {
   });
   return tdiag_list;
 }
+//---------------------------查询门急诊医生收治病人入院通知单-----------------------------------------------------------------
+export async function getpatretain(topcode, tgc) {
+  let tout_str = "";
+  let thsp_code = process.env.VUE_APP_HSP_CODE;
+  let turl = process.env.VUE_APP_INP_URL + "/searchpatretain/"
+      + thsp_code + "/" + topcode + "/" + tgc;
+  await fetch_data_api(turl).then(data => {
+    // console.log("getpatretain data=" + data);
+    tout_str = data;
+  });
+  return tout_str;
+}
 //-------------------------------------查询科室列表------------------------------------------------------
-export function getdept_codes(topcode, tgc) {
+export async function getdept_codes(topcode, tgc) {
   let dept_codes = Array.of(); //科室列表
   let turl = process.env.VUE_APP_INP_URL + "/searchdictdepartment/clinical/" + topcode + "/" + tgc;
-  fetch_data_api(turl).then(data => {
+  await fetch_data_api(turl).then(data => {
     // console.log("getdept_codes data="+ data)
     let tjson_obj = JSON.parse(data);
     for (let i = 0; i < tjson_obj.length; i++) {
@@ -171,7 +156,6 @@ export function getdept_codes(topcode, tgc) {
         "item-text": tjson_obj[i].deptName
       });
     }
-    return dept_codes;
   });
   return dept_codes;
 }
