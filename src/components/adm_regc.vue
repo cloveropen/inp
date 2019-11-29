@@ -9,7 +9,7 @@
           <v-layout row wrap>
             &emsp;&emsp;
             <v-flex d-flex>
-              <v-text-field v-model="admin_reg.pid_out" label="门诊号" @input="expidChanged($event)"> </v-text-field>
+              <v-text-field v-model="admin_reg.pid_out" label="门诊号" @input="pidoutChanged($event)"> </v-text-field>
             </v-flex>
             <v-flex d-flex>
               &emsp;&emsp;
@@ -247,7 +247,7 @@
                 hint="请输入两个以上的诊断关键字"
               ></v-autocomplete>
             </v-flex>
-             <v-flex d-flex>
+            <v-flex d-flex>
               &emsp;&emsp;
               <v-autocomplete
                 v-model="admin_reg.diag_id3"
@@ -263,7 +263,7 @@
                 label="入院第三诊断"
                 hint="请输入两个以上的诊断关键字"
               ></v-autocomplete>
-            </v-flex>            
+            </v-flex>
             <v-flex d-flex>
               &emsp;&emsp;
               <v-select
@@ -312,7 +312,7 @@
             </v-flex>
             <v-flex d-flex>
               &emsp;&emsp;
-              <v-text-field v-model="admin_reg.pre_pay_sum" label="预交押金" suffix="元"></v-text-field>
+              <v-text-field v-model="admin_reg.pre_pay_sum" label="预交押金" class="title" suffix="元"></v-text-field>
             </v-flex>
             <v-flex d-flex>
               &emsp;&emsp;
@@ -423,7 +423,7 @@
     <v-card>
       <v-card-title>
         入院通知单列表
-        <div class="flex-grow-1"></div>        
+        <div class="flex-grow-1"></div>
       </v-card-title>
       <v-data-table :headers="headers_pat_retain" :items="tpat_retain_lists"></v-data-table>
     </v-card>
@@ -446,7 +446,8 @@ import {
   getin_status,
   getin_purpose,
   getdiag,
-  getpatretain
+  getpatretain,
+  filladminregbypid
 } from "../scripts/adm_reg.js";
 
 export default {
@@ -455,10 +456,6 @@ export default {
     topcode: "",
     tgc: "",
     nameRules: [v => !!v || "姓名不能为空", v => (v && v.length >= 2) || "姓名长度不能少于2个汉字"],
-    //barcodeRules: [
-    //  v => !!v || "条形码不能为空",
-    //  v => (v && v.length >= 13) || "条形码应该为13位数字"
-    //],
     pay_type: "cash",
     patient_types: [], //患者类别列表
     genders: [], //性别列表
@@ -575,7 +572,7 @@ export default {
       { text: "申请医师", value: "retain_doctor" },
       { text: "门急诊诊断", value: "diag_name" },
       { text: "入院类别", value: "in_type" },
-      { text: "患者类型", value: "patient_type" }      
+      { text: "患者类型", value: "patient_type" }
     ],
     tpat_retain_lists: [],
     loading: false,
@@ -591,38 +588,45 @@ export default {
     this.tgc = get_regopcode().split("|")[1];
   },
   mounted() {
-    getpatient_type(this.topcode, this.tgc).then(data=>{
+    getpatient_type(this.topcode, this.tgc).then(data => {
       this.patient_types = data;
     });
-    getgender(this.topcode, this.tgc).then(data=>{
+    getgender(this.topcode, this.tgc).then(data => {
       this.genders = data;
     });
-    getnation(this.topcode, this.tgc).then(data=>{
+    getnation(this.topcode, this.tgc).then(data => {
       this.nations = data;
     });
-    getin_type(this.topcode, this.tgc).then(data=>{
+    getin_type(this.topcode, this.tgc).then(data => {
       this.in_types = data;
     });
-    getliaison_rels(this.topcode, this.tgc).then(data=>{
+    getliaison_rels(this.topcode, this.tgc).then(data => {
       this.liaison_rels = data;
     });
-    getdept_codes(this.topcode, this.tgc).then(data=>{
+    getdept_codes(this.topcode, this.tgc).then(data => {
       this.dept_codes = data;
     });
-    // this.doctor_codes = getdoctor_codes(this.admin_reg.doctor_out,this.topcode, this.tgc);
-    this.addr_provs = getprovs(this.topcode, this.tgc);
-    this.addr_citys = getcitys(process.env.VUE_APP_HSP_PROV, this.topcode, this.tgc);
-    this.addr_countys = getcountys(process.env.VUE_APP_HSP_CITY, this.topcode, this.tgc);
-    this.addr_townships = getstreets(process.env.VUE_APP_HSP_COUNTY, this.topcode, this.tgc);
-    getin_purpose(this.topcode, this.tgc).then(data=>{
-       this.in_purposes = data;
+    getprovs(this.topcode, this.tgc).then(data => {
+      this.addr_provs = data;
     });
-    getin_status(this.topcode, this.tgc).then(data=>{
-       this.in_statuss = data;
+    getcitys(process.env.VUE_APP_HSP_PROV, this.topcode, this.tgc).then(data => {
+      this.addr_citys = data;
     });
-    
-    getpatretain(this.topcode, this.tgc).then(data=>{
-       this.tpat_retain_lists = JSON.parse(data);
+    getcountys(process.env.VUE_APP_HSP_CITY, this.topcode, this.tgc).then(data => {
+      this.addr_countys = data;
+    });
+    getstreets(process.env.VUE_APP_HSP_COUNTY, this.topcode, this.tgc).then(data => {
+      this.addr_townships = data;
+    });
+    getin_purpose(this.topcode, this.tgc).then(data => {
+      this.in_purposes = data;
+    });
+    getin_status(this.topcode, this.tgc).then(data => {
+      this.in_statuss = data;
+    });
+
+    getpatretain(this.topcode, this.tgc).then(data => {
+      this.tpat_retain_lists = JSON.parse(data);
     });
 
     this.video = this.$refs.video;
@@ -642,7 +646,7 @@ export default {
     },
     search_diag3(val) {
       val && val !== this.select && this.querySeldiag3s(val);
-    },
+    }
   },
   methods: {
     validate() {
@@ -659,10 +663,10 @@ export default {
     querySeldiag1s(v) {
       this.loading = true;
       // console.log("v=" + v + "v.length=" + v.length);
-       if (v.length<2){
-         return ;
+      if (v.length < 2) {
+        return;
       }
-      getdiag(v,this.topcode,this.tgc).then(data=>{
+      getdiag(v, this.topcode, this.tgc).then(data => {
         this.items_diag1 = data;
       });
       this.loading = false;
@@ -670,10 +674,10 @@ export default {
     querySeldiag2s(v) {
       this.loading = true;
       // console.log("v=" + v + "v.length=" + v.length);
-       if (v.length<2){
-         return ;
+      if (v.length < 2) {
+        return;
       }
-      getdiag(v,this.topcode,this.tgc).then(data=>{
+      getdiag(v, this.topcode, this.tgc).then(data => {
         this.items_diag2 = data;
       });
       this.loading = false;
@@ -681,24 +685,26 @@ export default {
     querySeldiag3s(v) {
       this.loading = true;
       // console.log("v=" + v + "v.length=" + v.length);
-       if (v.length<2){
-         return ;
+      if (v.length < 2) {
+        return;
       }
-      getdiag(v,this.topcode,this.tgc).then(data=>{
+      getdiag(v, this.topcode, this.tgc).then(data => {
         this.items_diag3 = data;
       });
       this.loading = false;
     },
-
-    expidChanged(e) {
-      let texpid = e;
-      console.log("texpid e=" + e);
-      if (texpid.length < 10) {
+    pidoutChanged(e) {
+      let tpid_out = e;
+      console.log("tpid_out e=" + e);
+      if (tpid_out.length < 12) {
+        //门诊号必须12位
         return;
       }
-      //getpatient(texpid).then(data => {
-      //  this.out_reg = data;
-      //});
+      filladminregbypid(tpid_out, this.topcode, this.tgc).then(data => {
+        console.log("data=" + data)
+        let tjson_data = JSON.parse(data);
+        this.admin_reg = tjson_data;
+      });
     },
     readcardClicked(e) {
       console.log("e=" + e.target.innerText);

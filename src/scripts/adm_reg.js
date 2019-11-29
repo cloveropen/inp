@@ -138,7 +138,17 @@ export async function getpatretain(topcode, tgc) {
   let turl = process.env.VUE_APP_INP_URL + "/searchpatretain/"
       + thsp_code + "/" + topcode + "/" + tgc;
   await fetch_data_api(turl).then(data => {
-    // console.log("getpatretain data=" + data);
+    tout_str = data;
+  });
+  return tout_str;
+}
+//----------通过门诊号查询入院通知单或挂号信息填充入院登记信息,先查询住院通知单,如果没有入院通知单则查询挂号信息,如果挂号信息也不存在返回空-----------------------------------------------------------------
+export async function filladminregbypid(tpid,topcode, tgc) {
+  let tout_str = "";
+  let thsp_code = process.env.VUE_APP_HSP_CODE;
+  let turl = process.env.VUE_APP_INP_URL + "/filladmreg/"
+      + tpid + "/" + thsp_code + "/" + topcode + "/" + tgc;
+  await fetch_data_api(turl).then(data => {
     tout_str = data;
   });
   return tout_str;
@@ -160,11 +170,11 @@ export async function getdept_codes(topcode, tgc) {
   return dept_codes;
 }
 //----------------------------------------查询本科室可以挂号的专家列表---------------------------------------------------
-export function getdoctor_codes(tdept_code, tpost_tech, topcode, tgc) {
+export async function getdoctor_codes(tdept_code, tpost_tech, topcode, tgc) {
   let doctor_codes = Array.of(); //专家列表
   let turl = process.env.VUE_APP_INP_URL + "/searchdictperson/" + tdept_code + "/" + tpost_tech + "/";
   topcode + "/" + tgc;
-  fetch_data_api(turl).then(data => {
+  await fetch_data_api(turl).then(data => {
     let tjson_obj = JSON.parse(data);
     for (let i = 0; i < tjson_obj.length; i++) {
       doctor_codes.splice(i, 0, {
@@ -172,15 +182,14 @@ export function getdoctor_codes(tdept_code, tpost_tech, topcode, tgc) {
         "item-text": tjson_obj[i].personName
       });
     }
-    return doctor_codes;
   });
   return doctor_codes;
 }
 //------------------获取省份列表---------------------------
-export function getprovs(topcode, tgc) {
+export async function getprovs(topcode, tgc) {
   let addr_provs = Array.of(); //患者类别列表
   let turl = process.env.VUE_APP_INP_URL + "/searchdictprov/" + topcode + "/" + tgc;
-  fetch_data_api(turl).then(data => {    
+  await fetch_data_api(turl).then(data => {    
     let tjson_obj = JSON.parse(data);
     for (let i = 0; i < tjson_obj.length; i++) {
       addr_provs.splice(i, 0, {
@@ -188,16 +197,15 @@ export function getprovs(topcode, tgc) {
         "item-text": tjson_obj[i].name
       });
     }
-    return addr_provs;
   });
   return addr_provs;
 }
 
 //------------------获取指定省份的市列表---------------------------
-export function getcitys(tprovid, topcode, tgc) {
+export async function getcitys(tprovid, topcode, tgc) {
   let addr_citys = Array.of(); //市列表
   let turl = process.env.VUE_APP_INP_URL + "/searchdictcity/" + tprovid + "/" + topcode + "/" + tgc;
-  fetch_data_api(turl).then(data => {
+  await fetch_data_api(turl).then(data => {
     let tjson_obj = JSON.parse(data);
     for (let i = 0; i < tjson_obj.length; i++) {
       addr_citys.splice(i, 0, {
@@ -205,16 +213,15 @@ export function getcitys(tprovid, topcode, tgc) {
         "item-text": tjson_obj[i].name
       });
     }
-    return addr_citys;
   });
   return addr_citys;
 }
 
 //------------------获取指定市的区县列表---------------------------
-export function getcountys(tcityid, topcode, tgc) {
+export async function getcountys(tcityid, topcode, tgc) {
   let addr_countys = Array.of(); //指定市的区县列表
   let turl = process.env.VUE_APP_INP_URL + "/searchdictcounty/" + tcityid + "/" + topcode + "/" + tgc;
-  fetch_data_api(turl).then(data => {
+  await fetch_data_api(turl).then(data => {
     let tjson_obj = JSON.parse(data);
     for (let i = 0; i < tjson_obj.length; i++) {
       addr_countys.splice(i, 0, {
@@ -222,16 +229,15 @@ export function getcountys(tcityid, topcode, tgc) {
         "item-text": tjson_obj[i].name
       });
     }
-    return addr_countys;
   });
   return addr_countys;
 }
 
 //------------------获取指定区县的街道列表---------------------------
-export function getstreets(tcountyid, topcode, tgc) {
+export async function getstreets(tcountyid, topcode, tgc) {
   let addr_townships = Array.of(); //指定区县的街道列表
   let turl = process.env.VUE_APP_INP_URL + "/searchdictstreet/" + tcountyid + "/" + topcode + "/" + tgc;
-  fetch_data_api(turl).then(data => {
+  await fetch_data_api(turl).then(data => {
     let tjson_obj = JSON.parse(data);
     for (let i = 0; i < tjson_obj.length; i++) {
       addr_townships.splice(i, 0, {
@@ -239,7 +245,6 @@ export function getstreets(tcountyid, topcode, tgc) {
         "item-text": tjson_obj[i].name
       });
     }
-    return addr_townships;
   });
   return addr_townships;
 }
@@ -258,44 +263,6 @@ export function sch_weixin() {
 }
 
 // -------------------------------------------------------------------------------------------------------------------------------------------
-//---公用后台获取数据接口---------------------------------------
-/*async function fetch_data_api(turl, tmethod) {
-  let ret_data;
-  await fetch(turl, {
-    method: tmethod,
-    headers: {
-      Accept: "text/html",
-      "Content-Type": "application/json"
-    }
-  })
-    .then(function(response) {
-      if (response.ok) {
-        // window.alert("---ok=");
-      } else {
-        window.alert("警告:" + turl + "查询失败:" + response.statusText);
-      }
-      return response.json();
-    })
-    .then(function(data) {
-      ret_data = data;
-      let tresultCode = data.resultCode;
-      if (tresultCode === "0") {
-        ret_data = JSON.parse(data.outdata);
-      } else {
-        //返回失败数据
-        console.log("查询失败:" + data.errorMsg);
-        window.alert("查询失败:" + data.errorMsg);
-      }
-      return ret_data;
-    })
-    .catch(function(err) {
-      console.log("查询error=" + err);
-      window.alert("查询error=" + err);
-      return err;
-    });
-  //console.log("ret_data="+JSON.stringify(ret_data));
-  return await ret_data;
-}*/
 //---公用后台获取数据接口--------------------------------------
 export async function fetch_data_api(turl) {
   try {
