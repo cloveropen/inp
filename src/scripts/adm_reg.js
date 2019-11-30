@@ -172,8 +172,8 @@ export async function getdept_codes(topcode, tgc) {
 //----------------------------------------查询本科室可以挂号的专家列表---------------------------------------------------
 export async function getdoctor_codes(tdept_code, tpost_tech, topcode, tgc) {
   let doctor_codes = Array.of(); //专家列表
-  let turl = process.env.VUE_APP_INP_URL + "/searchdictperson/" + tdept_code + "/" + tpost_tech + "/";
-  topcode + "/" + tgc;
+  let turl = process.env.VUE_APP_INP_URL + "/searchdictperson/" + tdept_code + "/" 
+    + tpost_tech + "/" +  topcode + "/" + tgc;
   await fetch_data_api(turl).then(data => {
     let tjson_obj = JSON.parse(data);
     for (let i = 0; i < tjson_obj.length; i++) {

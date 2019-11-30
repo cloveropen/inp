@@ -27,6 +27,7 @@
                 :rules="[v => !!v || '患者类型不能为空']"
                 hide-details
                 prepend-icon="map"
+                @input="patient_typeChanged($event)"
               ></v-select>
             </v-flex>
             <v-flex d-flex>
@@ -41,7 +42,6 @@
                 :rules="[v => !!v || '患者入院医疗类别不能为空']"
                 hide-details
                 prepend-icon="map"
-                single-line
               ></v-select>
             </v-flex>
             <v-flex d-flex>
@@ -65,21 +65,17 @@
             <v-flex d-flex>
               &emsp;&emsp;
               <v-select v-model="admin_reg.nation" :items="nations" item-text="item-text" item-value="item-value" label="民族" hide-details></v-select>
+            </v-flex>            
+            <v-flex d-flex>
+               &emsp;&emsp;
+              <v-text-field v-model="admin_reg.pid" label="住院号" disabled></v-text-field>
             </v-flex>
           </v-layout>
           <v-layout row wrap>
-            &emsp;&emsp;
             <v-flex d-flex>
-              <v-text-field v-model="admin_reg.pid" label="住院号" disabled></v-text-field>
+              &emsp;&emsp;
+              <v-text-field v-model="admin_reg.pre_pay_sum" label="预交押金" class="title" suffix="元"></v-text-field>
             </v-flex>
-            &emsp;&emsp;
-            <!-- <v-flex d-flex>
-              <v-text-field
-                v-model="admin_reg.ex_pid"
-                label="患者主索引"
-                disabled
-              ></v-text-field>
-            </v-flex> -->
             <v-flex d-flex>
               &emsp;&emsp;
               <v-text-field v-model="admin_reg.tel" label="联系电话"></v-text-field>&emsp;&emsp;
@@ -210,7 +206,6 @@
                 hide-details
                 prepend-icon="group_work"
                 required
-                @input="dept_codeChanged($event)"
               ></v-select>
             </v-flex>
             <v-flex d-flex>
@@ -307,13 +302,8 @@
                 hide-details
                 prepend-icon="group_work"
                 single-line
-                @input="dept_codeChanged($event)"
               ></v-select>
-            </v-flex>
-            <v-flex d-flex>
-              &emsp;&emsp;
-              <v-text-field v-model="admin_reg.pre_pay_sum" label="预交押金" class="title" suffix="元"></v-text-field>
-            </v-flex>
+            </v-flex>            
             <v-flex d-flex>
               &emsp;&emsp;
               <v-text-field v-model="admin_reg.remark" label="备注"></v-text-field>
@@ -366,7 +356,8 @@
             </v-col>
           </v-row>
         </v-card-text>
-
+ <v-divider></v-divider>
+    <v-spacer>&emsp;</v-spacer>
         <v-card-actions class="justify-center">
           <v-layout row wrap no-gutters>
             <v-flex d-flex><v-spacer></v-spacer></v-flex>
@@ -377,10 +368,11 @@
             </v-radio-group>
 
             <v-btn id="snap" :disabled="!valid" color="success" @click="capture">拍照</v-btn>
-            <v-btn :disabled="!valid" color="success" @click="validate">读健康卡</v-btn>
-            <v-btn :disabled="!valid" color="success" v-on:click="readcardClicked($event)">读医保卡</v-btn>
+            <v-btn :disabled="!valid" color="success" @click="validate" :style="display_btn_readhealth">读健康卡</v-btn>
+            <v-btn :disabled="!valid" color="success" v-on:click="readcardClicked($event)" :style="display_btn_readmi">读医保卡</v-btn>
             <v-btn :disabled="!valid" color="success" @click="outregcashClicked($event)">确认入院</v-btn>
-            <v-btn :disabled="!valid" color="success" @click="schweixinClicked($event)">
+            <v-btn :disabled="valid" color="success" >打印预交金收据</v-btn>
+            <v-btn :disabled="valid" color="success" @click="schweixinClicked($event)">
               查询微信订单
             </v-btn>
             <v-flex d-flex><v-spacer></v-spacer></v-flex>
@@ -388,44 +380,50 @@
         </v-card-actions>
       </v-card>
     </v-form>
+ <v-divider></v-divider>
+    <v-spacer>&emsp;</v-spacer>
     <canvas ref="canvas" id="canvas" width="640" height="480" hidden></canvas>
-    <!-- <ul>
-      <v-list v-for="c in captures" :key="c">
-        <img v-bind:src="c" height="180" />
-      </v-list>
-    </ul> -->
-
-    <v-row>
-      <v-col sm="12">
-        <!--  第二级 -->
+    <v-row no-gutters>
+      <v-col cols="12" sm="12">
         <v-row no-gutters>
-          <v-col cols="8" sm="6">
-            <!-- 第三级 显示照片 -->
-            <v-row no-gutters>
-              <v-col><img v-bind:src="this.admin_reg_pic.pic1" height="120"/></v-col>
-              <v-col><img v-bind:src="this.admin_reg_pic.pic2" height="120"/></v-col>
-              <v-col><img v-bind:src="this.admin_reg_pic.pic3" height="120"/></v-col>
-            </v-row>
-            <v-row no-gutters>
-              <v-col><img v-bind:src="this.admin_reg_pic.pic4" height="120"/></v-col>
-              <v-col><img v-bind:src="this.admin_reg_pic.pic5" height="120"/></v-col>
-              <v-col><img v-bind:src="this.admin_reg_pic.pic6" height="120"/></v-col>
-            </v-row>
-          </v-col>
-          <v-col cols="4" sm="6">
-            <v-card class="pa-2" outlined style="background-color: lightgrey;" tile>
-              预交金收据打印样式
-            </v-card>
-          </v-col>
+          <v-col><img v-bind:src="this.admin_reg_pic.pic1" height="240"/></v-col>
+          <v-col><img v-bind:src="this.admin_reg_pic.pic2" height="240"/></v-col>
+          <v-col><img v-bind:src="this.admin_reg_pic.pic3" height="240"/></v-col>
+        </v-row>
+        <v-row no-gutters>
+          <v-col><img v-bind:src="this.admin_reg_pic.pic4" height="240"/></v-col>
+          <v-col><img v-bind:src="this.admin_reg_pic.pic5" height="240"/></v-col>
+          <v-col><img v-bind:src="this.admin_reg_pic.pic6" height="240"/></v-col>
         </v-row>
       </v-col>
     </v-row>
+    <v-row no-gutters>
+      <v-col cols="12" sm="12">
+        <v-parallax
+          height="700"
+          dark
+          :src="require('../assets/img/blank_cash.jpg')"
+        >
+          <div id="print_deposit">
+            <v-card
+              class="pa-2"
+              outlined
+              style="background-color: lightgrey;"
+              tile
+            >
+              预交金收据打印样式
+            </v-card>
+          </div>
+        </v-parallax>
+      </v-col>
+    </v-row>
+    
     <v-card>
       <v-card-title>
         入院通知单列表
         <div class="flex-grow-1"></div>
       </v-card-title>
-      <v-data-table :headers="headers_pat_retain" :items="tpat_retain_lists"></v-data-table>
+      <v-data-table :headers="headers_pat_retain" :items="tpat_retain_lists" item-key="seq" @click:row="select_pat_retain"> </v-data-table>
     </v-card>
   </v-container>
 </template>
@@ -572,7 +570,8 @@ export default {
       { text: "申请医师", value: "retain_doctor" },
       { text: "门急诊诊断", value: "diag_name" },
       { text: "入院类别", value: "in_type" },
-      { text: "患者类型", value: "patient_type" }
+      { text: "患者类型", value: "patient_type" },
+      { text: "通知单编号", value: "seq" }
     ],
     tpat_retain_lists: [],
     loading: false,
@@ -581,7 +580,9 @@ export default {
     items_diag3: [],
     search_diag1: null,
     search_diag2: null,
-    search_diag3: null
+    search_diag3: null,
+    display_btn_readhealth: "display:none",
+    display_btn_readmi: "display:none",
   }),
   created() {
     this.topcode = get_regopcode().split("|")[0];
@@ -701,10 +702,34 @@ export default {
         return;
       }
       filladminregbypid(tpid_out, this.topcode, this.tgc).then(data => {
-        console.log("data=" + data)
+        console.log("data=" + data);
         let tjson_data = JSON.parse(data);
         this.admin_reg = tjson_data;
       });
+    },
+    select_pat_retain(item) {
+      let tpid_out = item.pid;
+      filladminregbypid(tpid_out, this.topcode, this.tgc).then(data => {
+        console.log("select_pat_retain data=" + data);
+        let tjson_data = JSON.parse(data);
+        this.admin_reg = tjson_data;
+      });      
+    },
+    //------------------医保类别医保1*读卡显示,农合2*显示读健康卡--------------
+    patient_typeChanged(e) {
+      let tptype = e;
+      console.log("tptype e=" + tptype);
+      this.display_btn_readmi = "display:none";
+      this.display_btn_readhealth = "display:none";
+      if (tptype.slice(0, 1) == "1") {
+        //医保
+        this.display_btn_readmi = "";
+        this.isdisabled_patient_name = true;
+      }
+      if (tptype.slice(0, 1) == "2") {
+        //农合
+        this.display_btn_readhealth = "";
+      }
     },
     readcardClicked(e) {
       console.log("e=" + e.target.innerText);
@@ -720,33 +745,34 @@ export default {
       //sch_weixin();
     },
     dept_codeChanged(e) {
-      let tdept_code = this.out_reg.deptCode;
+      let tdept_code = this.admin_reg.dept_code;
       console.log("dept_codeChanged e=" + e);
       let tpost_tech = "1";
-      this.doctor_codes = getdoctor_codes(tdept_code, tpost_tech);
-    },
-    reg_typeChanged(e) {
-      console.log("reg_typeChanged e=" + e);
-      /*let treg_type = this.out_reg.regType;
-      getregprice(treg_type).then(data => {
-        this.out_reg.regPrice = data[0];
-        this.out_reg.checkPrice = data[1];
-      });*/
+      getdoctor_codes(tdept_code, tpost_tech, this.topcode, this.tgc).then(data => {
+        this.doctor_codes = data;
+      });
     },
     //------------------获取指定省份的市列表---------------------------
     prov_Changed() {
-      let tprovid = this.out_reg.addrProv;
-      this.addr_citys = getcitys(tprovid);
+      let tprovid = this.admin_reg.addr_prov;
+      console.log("tprovid="+tprovid)
+      getcitys(tprovid, this.topcode, this.tgc).then(data => {
+        this.addr_citys = data;
+      });
     },
     //------------------获取指定市的区县列表---------------------------
     city_Changed() {
-      let tcityid = this.out_reg.addrCity;
-      this.addr_countys = getcountys(tcityid);
+      let tcityid = this.admin_reg.addr_city;
+      getcountys(tcityid, this.topcode, this.tgc).then(data => {
+        this.addr_countys = data;
+      });
     },
     //------------------获取指定区县的街道列表---------------------------
     county_Changed() {
-      let tcountyid = this.out_reg.addrCounty;
-      this.addr_townships = getstreets(tcountyid);
+      let tcountyid = this.admin_reg.addr_county;
+      getstreets(tcountyid, this.topcode, this.tgc).then(data => {
+        this.addr_townships = data;
+      });
     },
     capture() {
       this.canvas = this.$refs.canvas;
@@ -756,32 +782,32 @@ export default {
       //this.captures.push(this.$refs.canvas.toDataURL("image/png"));
       switch (this.capture_num) {
         case 0:
-          this.out_reg_pic.pic1 = this.$refs.canvas.toDataURL("image/png");
+          this.admin_reg_pic.pic1 = this.$refs.canvas.toDataURL("image/png");
           this.capture_num++;
           break;
         case 1:
-          this.out_reg_pic.pic2 = this.$refs.canvas.toDataURL("image/png");
+          this.admin_reg_pic.pic2 = this.$refs.canvas.toDataURL("image/png");
           this.capture_num++;
           break;
         case 2:
-          this.out_reg_pic.pic3 = this.$refs.canvas.toDataURL("image/png");
+          this.admin_reg_pic.pic3 = this.$refs.canvas.toDataURL("image/png");
           this.capture_num++;
           break;
         case 3:
-          this.out_reg_pic.pic4 = this.$refs.canvas.toDataURL("image/png");
+          this.admin_reg_pic.pic4 = this.$refs.canvas.toDataURL("image/png");
           this.capture_num++;
           break;
         case 4:
-          this.out_reg_pic.pic5 = this.$refs.canvas.toDataURL("image/png");
+          this.admin_reg_pic.pic5 = this.$refs.canvas.toDataURL("image/png");
           this.capture_num++;
           break;
         case 5:
-          this.out_reg_pic.pic6 = this.$refs.canvas.toDataURL("image/png");
+          this.admin_reg_pic.pic6 = this.$refs.canvas.toDataURL("image/png");
           this.capture_num++;
           break;
         default:
           this.capture_num = 0;
-          this.out_reg_pic.pic1 = this.$refs.canvas.toDataURL("image/png");
+          this.admin_reg_pic.pic1 = this.$refs.canvas.toDataURL("image/png");
       }
       //--
     }
