@@ -368,9 +368,9 @@
             </v-radio-group>
 
             <v-btn id="snap" :disabled="!valid" color="success" @click="capture">拍照</v-btn>
-            <v-btn :disabled="!valid" color="success" @click="validate" :style="display_btn_readhealth">读健康卡</v-btn>
+            <v-btn :disabled="!valid" color="success" :style="display_btn_readhealth">读健康卡</v-btn>
             <v-btn :disabled="!valid" color="success" v-on:click="readcardClicked($event)" :style="display_btn_readmi">读医保卡</v-btn>
-            <v-btn :disabled="!valid" color="success" @click="outregcashClicked($event)">确认入院</v-btn>
+            <v-btn :disabled="!valid" color="success" @click="admreg_save">确认入院</v-btn>
             <v-btn :disabled="valid" color="success" >打印预交金收据</v-btn>
             <v-btn :disabled="valid" color="success" @click="schweixinClicked($event)">
               查询微信订单
@@ -445,7 +445,9 @@ import {
   getin_purpose,
   getdiag,
   getpatretain,
-  filladminregbypid
+  filladminregbypid,
+  save_adminreg,
+  save_adminreg_pic
 } from "../scripts/adm_reg.js";
 
 export default {
@@ -649,6 +651,7 @@ export default {
       val && val !== this.select && this.querySeldiag3s(val);
     }
   },
+  // ----------------------------------------------------------------------
   methods: {
     validate() {
       if (this.$refs.form.validate()) {
@@ -735,10 +738,42 @@ export default {
       console.log("e=" + e.target.innerText);
       //readcard_mi();
     },
-
-    outregweixinClicked(e) {
-      console.log("e=" + e.target.innerText);
-      //outreg_weixin();
+    admreg_save() {
+      console.log("确认入院登记");
+      let tjson_adm_reg = JSON.stringify(this.admin_reg);
+      let tin_str = tjson_adm_reg + "|" + this.topcode + "|" +this.tgc;
+      // console.log("tin_str="+tin_str);
+      save_adminreg(tin_str).then(data => {
+        console.log("admreg_save data=" + data);
+        let tjson_obj = JSON.parse(data);
+        let tlist = Array.of();
+        tlist = tjson_obj.outdata.split("|");
+        console.log("-----tlist[0]=" + tlist[0]+ "   tlist[1]=" +tlist[1]);
+        if (tlist[0]<0){
+          window.alert("入院登记失败:" + tlist[1]);
+        }else{
+          this.admin_reg.pid = tlist[0];
+          this.admin_reg_pic.pid = this.admin_reg.pid;
+          this.admin_reg_pic.ex_pid = this.admin_reg.ex_pid;
+          this.admin_reg_pic.patient_name = this.admin_reg.patient_name;
+          this.admin_reg_pic.idcard = this.admin_reg.idcard;
+          this.admin_reg_pic.health_id = this.admin_reg.health_id;
+          this.admin_reg_pic.micard = this.admin_reg.micard;
+          this.admin_reg_pic.capture_time = this.admin_reg.in_time;
+          this.admin_reg_pic.capture_opid = this.admin_reg.opcode;
+          // -------------------保存照片----------------------------------------------
+          this.admin_reg_pic.topcode = this.topcode;
+          this.admin_reg_pic.tgc = this.tgc;
+          let tjson_adm_reg_pic = JSON.stringify(this.admin_reg_pic);
+          console.log("tjson_adm_reg_pic=" + tjson_adm_reg_pic);
+          save_adminreg_pic(tjson_adm_reg_pic).then(data => {
+            console.log("admreg_pic_save data=" + data);
+          });
+          window.alert("入院登记完成,新住医院号:" + tlist[0] + "请打印预交金收据");
+        }
+      
+      });
+      
     },
     schweixinClicked(e) {
       console.log("e=" + e.target.innerText);
@@ -782,32 +817,32 @@ export default {
       //this.captures.push(this.$refs.canvas.toDataURL("image/png"));
       switch (this.capture_num) {
         case 0:
-          this.admin_reg_pic.pic1 = this.$refs.canvas.toDataURL("image/png");
+          this.admin_reg_pic.pic1 = this.$refs.canvas.toDataURL("image/png",0.1);
           this.capture_num++;
           break;
         case 1:
-          this.admin_reg_pic.pic2 = this.$refs.canvas.toDataURL("image/png");
+          this.admin_reg_pic.pic2 = this.$refs.canvas.toDataURL("image/png",0.1);
           this.capture_num++;
           break;
         case 2:
-          this.admin_reg_pic.pic3 = this.$refs.canvas.toDataURL("image/png");
+          this.admin_reg_pic.pic3 = this.$refs.canvas.toDataURL("image/png",0.1);
           this.capture_num++;
           break;
         case 3:
-          this.admin_reg_pic.pic4 = this.$refs.canvas.toDataURL("image/png");
+          this.admin_reg_pic.pic4 = this.$refs.canvas.toDataURL("image/png",0.1);
           this.capture_num++;
           break;
         case 4:
-          this.admin_reg_pic.pic5 = this.$refs.canvas.toDataURL("image/png");
+          this.admin_reg_pic.pic5 = this.$refs.canvas.toDataURL("image/png",0.1);
           this.capture_num++;
           break;
         case 5:
-          this.admin_reg_pic.pic6 = this.$refs.canvas.toDataURL("image/png");
+          this.admin_reg_pic.pic6 = this.$refs.canvas.toDataURL("image/png",0.1);
           this.capture_num++;
           break;
         default:
           this.capture_num = 0;
-          this.admin_reg_pic.pic1 = this.$refs.canvas.toDataURL("image/png");
+          this.admin_reg_pic.pic1 = this.$refs.canvas.toDataURL("image/png",0.1);
       }
       //--
     }

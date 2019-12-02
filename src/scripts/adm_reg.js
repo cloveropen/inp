@@ -261,7 +261,26 @@ export function sch_weixin() {
   console.log("查询微信订单");
   return "";
 }
-
+//-------------------------入院登记确认-----------------------------------------------------------
+export async function save_adminreg(tin_str) {
+  let tout_Str = ""; //成功返回住院号|ok,失败返回-1|失败原因
+  let turl = process.env.VUE_APP_INP_URL + "/save_admreg";
+  await post_data_async(turl, tin_str).then(data => {
+    tout_Str = JSON.stringify(data);
+    return tout_Str;
+  });
+  return tout_Str;
+}
+//-------------------------入院登记保存照片-----------------------------------------------------------
+export async function save_adminreg_pic(tin_str) {
+  let tout_Str = ""; //成功返回住院号|ok,失败返回-1|失败原因
+  let turl = process.env.VUE_APP_INP_URL + "/save_admreg_pic";
+  await post_data_async(turl, tin_str).then(data => {
+    tout_Str = JSON.stringify(data);
+    return tout_Str;
+  });
+  return tout_Str;
+}
 // -------------------------------------------------------------------------------------------------------------------------------------------
 //---公用后台获取数据接口--------------------------------------
 export async function fetch_data_api(turl) {
@@ -287,7 +306,7 @@ export async function fetch_data_api(turl) {
   }
 }
 
-export async function post_cash_async(turl, tbody) {
+export async function post_data_async(turl, tbody) {
   try {
     let response = await fetch(turl, {
       method: "post",
