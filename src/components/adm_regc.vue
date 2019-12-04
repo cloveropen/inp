@@ -640,6 +640,9 @@ export default {
       });
     }
   },
+  destroyed: function () {
+    this.video.srcObject.getTracks()[0].stop(); //关闭摄像头
+  },
   watch: {
     search_diag1(val) {
       val && val !== this.select && this.querySeldiag1s(val);

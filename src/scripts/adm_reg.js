@@ -169,6 +169,32 @@ export async function getdept_codes(topcode, tgc) {
   });
   return dept_codes;
 }
+//---------------------------查询在院患者预交金列表-----------------------------------------------------------------
+export async function getdeposit_list(tnum_lmt, tname, topcode, tgc) {
+  // tnum_lmt 表示限制返回记录数,tname 表示姓名关键字
+  let tout_str = "";
+  let thsp_code = process.env.VUE_APP_HSP_CODE;
+  let turl = process.env.VUE_APP_INP_URL + "/searchdeposit_list/"
+      + tnum_lmt + "/" + tname + "/" + thsp_code + "/" + topcode + "/" + tgc;
+  let tencode_url = encodeURI(turl);    
+  await fetch_data_api(tencode_url).then(data => {
+    tout_str = data;
+  });
+  return tout_str;
+}
+//---------------------------用在院患者登记信息填充预交金基本信息-----------------------------------------------------------------
+export async function filldeposit(tpid, topcode, tgc) {
+  // tnum_lmt 表示限制返回记录数,tname 表示姓名关键字
+  let tout_str = "";
+  let thsp_code = process.env.VUE_APP_HSP_CODE;
+  let turl = process.env.VUE_APP_INP_URL + "/filldeposit/"
+      + tpid + "/" + thsp_code + "/" + topcode + "/" + tgc;
+  let tencode_url = encodeURI(turl);
+  await fetch_data_api(tencode_url).then(data => {
+    tout_str = data;
+  });
+  return tout_str;
+}
 //----------------------------------------查询本科室可以挂号的专家列表---------------------------------------------------
 export async function getdoctor_codes(tdept_code, tpost_tech, topcode, tgc) {
   let doctor_codes = Array.of(); //专家列表
@@ -275,6 +301,16 @@ export async function save_adminreg(tin_str) {
 export async function save_adminreg_pic(tin_str) {
   let tout_Str = ""; //成功返回住院号|ok,失败返回-1|失败原因
   let turl = process.env.VUE_APP_INP_URL + "/save_admreg_pic";
+  await post_data_async(turl, tin_str).then(data => {
+    tout_Str = JSON.stringify(data);
+    return tout_Str;
+  });
+  return tout_Str;
+}
+//-------------------------补预交金确认-----------------------------------------------------------
+export async function deposit4cash(tin_str) {
+  let tout_Str = ""; //成功返回发票号|ok,失败返回-1|失败原因
+  let turl = process.env.VUE_APP_INP_URL + "/save_deposit";
   await post_data_async(turl, tin_str).then(data => {
     tout_Str = JSON.stringify(data);
     return tout_Str;
