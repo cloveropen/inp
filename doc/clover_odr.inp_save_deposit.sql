@@ -75,7 +75,7 @@ BEGIN
 	SELECT to_char(to_number(coalesce(invoice_nmb3,'00000000'),'99999999')+1,'00000000') into tflow_nmb
 	  FROM clover_md.kd99  where opcode=topcode;
 	-- 获取打印门诊发票流水号(invoice_nmb2)
-	select clover_odr.sch_invoice_nmb(topcode) into tin_str1;
+	select clover_odr.sch_invoice_nmb(topcode,3) into tin_str1;
 	select split_part(tin_str1,'|', 3) into tinvoice_nmb;
 	
 	tdeposit.seq := nextval('clover_odr.seq_deposit');

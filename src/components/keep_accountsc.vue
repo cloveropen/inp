@@ -5,157 +5,63 @@
         <v-layout row wrap>
           <v-flex d-flex>
             &emsp;&emsp;
-            <v-text-field
-              v-model="out_reg.pid"
-              label="门诊号"
-              @input="getfeedetail($event)"
-            ></v-text-field
-            >&emsp;&emsp;
+            <v-text-field v-model="admin_reg.pid" label="住院号" @input="getfeedetail($event)"></v-text-field>&emsp;&emsp;
           </v-flex>
+          <v-flex d-flex> <v-text-field v-model="admin_reg.patient_name" label="姓名" disabled></v-text-field>&emsp;&emsp; </v-flex>
+          <v-flex d-flex> <v-text-field v-model="admin_reg.in_type" label="就诊类别" disabled></v-text-field>&emsp;&emsp; </v-flex>
+          <v-flex d-flex> <v-text-field v-model="admin_reg.patient_type" label="患者类别" disabled></v-text-field>&emsp;&emsp; </v-flex>
+          <v-flex d-flex> <v-text-field v-model="admin_reg.pre_pay_left" label="预交金余额" disabled></v-text-field>&emsp;&emsp; </v-flex>
           <v-flex d-flex>
-            <v-text-field
-              v-model="out_reg.patientName"
-              label="姓名"
-              disabled
-            ></v-text-field
             >&emsp;&emsp;
-          </v-flex>
-          <v-flex d-flex>
-            <v-text-field
-              v-model="out_reg.regType"
-              label="就诊类别"
-              disabled
-            ></v-text-field
-            >&emsp;&emsp;
-          </v-flex>
-          <v-flex d-flex>
-            <v-text-field
-              v-model="out_reg.patientType"
-              label="患者类别"
-              disabled
-            ></v-text-field
-            >&emsp;&emsp;
-          </v-flex>
-          <v-flex d-flex>
-            <v-text-field
-              v-model="out_reg.miPaccLeft"
-              label="医保卡余额"
-              disabled
-            ></v-text-field
-            >&emsp;&emsp;
+            <v-text-field v-model="admin_reg.all_sum" label="住院总费用" disabled></v-text-field>
           </v-flex>
           <v-flex d-flex>
             &emsp;&emsp;
-            <v-text-field
-              v-model="out_reg.outDiag"
-              label="门诊诊断"
-              disabled
-            ></v-text-field
-            >&emsp;&emsp;
+            <v-text-field v-model="admin_reg.diag_name" label="入院诊断" disabled></v-text-field>&emsp;&emsp;
           </v-flex>
-          <v-flex d-flex>
-            <v-text-field
-              v-model="out_reg.addr"
-              label="住址"
-              disabled
-            ></v-text-field
-            >&emsp;&emsp;
-          </v-flex>
+          <v-flex d-flex> <v-text-field v-model="admin_reg.addr_street" label="住址" disabled></v-text-field>&emsp;&emsp; </v-flex>
         </v-layout>
       </v-card-text>
     </v-card>
     <div>
-   <v-toolbar
-    dark
-    color="teal"
-  >
-    <v-toolbar-title>选择收费项目</v-toolbar-title>
-    <v-autocomplete
-      v-model="select"
-      :loading="loading"
-      :items="items"
-      :search-input.sync="search"
-      cache-items
-      class="mx-4"
-      flat
-      hide-no-data
-      hide-details
-      label="补收收费项目"
-      solo-inverted
-    ></v-autocomplete>
-    <v-btn icon>
-      <v-icon>mdi-dots-vertical</v-icon>
-    </v-btn>
-     <v-text-field
-            v-model="firstname"
-            label="数量"
-            required
-      ></v-text-field>
-  </v-toolbar>
-  </div>
+      <v-toolbar dark color="teal">
+        <v-toolbar-title>选择收费项目</v-toolbar-title>
+        <v-autocomplete
+          v-model="item_code"
+          :loading="loading"
+          :items="items_dictitem"
+          item-text="item-text"
+          item-value="item-value"
+          :search-input.sync="search_dictitem"
+          cache-items
+          class="mx-4"
+          flat
+          hide-no-data
+          hide-details
+          label="补收收费项目"
+          solo-inverted
+          hint="请输入两个以上的收费项目关键字"
+        ></v-autocomplete>
+        <v-btn icon>
+          <v-icon>mdi-dots-vertical</v-icon>
+        </v-btn>
+        数量
+        <v-btn icon>
+          <v-icon>mdi-dots-vertical</v-icon>
+        </v-btn>
+        <v-text-field v-model="item_num" label="数量" required single-line></v-text-field>
+      </v-toolbar>
+    </div>
     <!--------------------------结算信息栏----------------------------------------------- -->
     <v-card class="mx-auto" max-width="99%" min-width="100%">
-      <v-card-text>
-        <v-layout row wrap>
-          <v-flex d-flex>
-            &emsp;&emsp;
-            <v-text-field
-              v-model="out_reg.payShould"
-              label="应收金额"
-              disabled
-            ></v-text-field>
-            &emsp;&emsp;
-          </v-flex>
-          <v-flex d-flex>
-            <v-text-field
-              v-model="out_reg.payCash"
-              label="现金支付"
-              disabled
-            ></v-text-field>
-            &emsp;&emsp;
-          </v-flex>
-          <v-flex d-flex>
-            <v-text-field
-              v-model="out_reg.payNfc"
-              label="移动支付"
-              disabled
-            ></v-text-field>
-            &emsp;&emsp;
-          </v-flex>
-          <v-flex d-flex>
-            <v-text-field
-              v-model="out_reg.payPacc"
-              label="医保帐户"
-              disabled
-            ></v-text-field>
-            &emsp;&emsp;
-          </v-flex>
-          <v-flex d-flex>
-            <v-text-field
-              v-model="out_reg.payFund"
-              label="医保统筹"
-              disabled
-            ></v-text-field>
-            &emsp;&emsp;
-          </v-flex>
-        </v-layout>
-      </v-card-text>
-
       <v-card-actions class="justify-center">
         <v-layout row wrap no-gutters>
-          
-          <v-flex d-flex          
+          <v-flex d-flex
             ><v-spacer></v-spacer>
             <v-btn id="snap" :disabled="!valid" color="success">预 结 算</v-btn>
-            <v-btn :disabled="!valid" color="success" @click="validate"
-              >新增费用</v-btn
-            >
-            <v-btn :disabled="!valid" color="success" @click="validate"
-              >确认记帐</v-btn
-            >
-            <v-btn :disabled="!valid" color="success" @click="validate"
-              >查询明细</v-btn
-            >          
+            <v-btn :disabled="!valid" color="success" @click="validate">新增费用</v-btn>
+            <v-btn :disabled="!valid" color="success" @click="validate">确认记帐</v-btn>
+            <v-btn :disabled="!valid" color="success" @click="validate">查询明细</v-btn>
             <v-spacer></v-spacer
           ></v-flex>
         </v-layout>
@@ -163,111 +69,91 @@
     </v-card>
     <!-- -------------------------费用明细栏 --------------------------------------------- -->
     <v-card>
-    <v-card-title>
-      患者住院费用明细表     
-     
-    </v-card-title>
-    <v-data-table
-      :headers="headers"
-      :items="fee_details"
-       :items-per-page="10"
-        class="elevation-1"
-    ></v-data-table>
-  </v-card>
+      <v-card-title>
+        患者住院费用明细表
+      </v-card-title>
+      <v-data-table :headers="headers" :items="fee_details" :items-per-page="10" class="elevation-1"></v-data-table>
+    </v-card>
   </v-container>
 </template>
 
 <script>
+import { getdiag, get_regopcode } from "../scripts/adm_reg.js";
 export default {
   data: () => ({
     valid: true,
-    nameRules: [
-      v => !!v || "姓名不能为空",
-      v => (v && v.length >= 2) || "姓名长度不能少于2个汉字"
-    ],
-   loading: false,
-        items: [],
-        search: null,
-        select: null,
-        states: [
-          'Alabama',
-          'Alaska',
-          'American Samoa',
-          'Arizona',
-          'Arkansas',
-          'California',
-          'Colorado',
-          'Connecticut',
-          'Delaware',
-          'District of Columbia',
-          'Federated States of Micronesia',
-          'Florida',
-          'Georgia',
-          'Guam',
-          'Hawaii',
-          'Idaho',
-          'Illinois',
-          'Indiana',
-          'Iowa',
-          'Kansas',
-          'Kentucky',
-          'Louisiana',
-          'Maine',
-          'Marshall Islands',
-          'Maryland',
-          'Massachusetts',
-          'Michigan',
-          'Minnesota',
-          'Mississippi',
-          'Missouri',
-          'Montana',
-          'Nebraska',
-          'Nevada',
-          'New Hampshire',
-          'New Jersey',
-          'New Mexico',
-          'New York',
-          'North Carolina',
-          'North Dakota',
-          'Northern Mariana Islands',
-          'Ohio',
-          'Oklahoma',
-          'Oregon',
-          'Palau',
-          'Pennsylvania',
-          'Puerto Rico',
-          'Rhode Island',
-          'South Carolina',
-          'South Dakota',
-          'Tennessee',
-          'Texas',
-          'Utah',
-          'Vermont',
-          'Virgin Island',
-          'Virginia',
-          'Washington',
-          'West Virginia',
-          'Wisconsin',
-          'Wyoming',
-        ],
-    out_reg: {
-      seq: 0,
-      hspCode: process.env.VUE_APP_HSP_CODE,
-      pid: "", //门诊号
-      patientName: "",
-      patientType: "",
-      regType: "",
-      prescNmb: "",
-      outDiag: "", //门诊诊断
-      miPaccLeft: 0.0, //医保卡余额
-      addr: "", //住址
-      payShould: 0.0, //应收金额
-      payCash: 0.0, //实收现金
-      payNfc: 0.0, //移动支付
-      payPacc: 0.0, //医保帐户
-      payFund: 0.0 //医保统筹      
+    topcode: "",
+    tgc: "",
+    admin_reg: {
+      hsp_code: process.env.VUE_APP_HSP_CODE,
+      pid: "",
+      ex_pid: "",
+      patient_name: "",
+      in_num: 1,
+      gender: "",
+      patient_type: "",
+      in_type: "",
+      idcard: "",
+      nation: "",
+      idcard_type: "",
+      birth_date: "",
+      age_y: 0,
+      age_m: 0,
+      age_d: 0,
+      addr_prov: process.env.VUE_APP_HSP_PROV,
+      addr_city: process.env.VUE_APP_HSP_CITY,
+      addr_county: process.env.VUE_APP_HSP_COUNTY,
+      addr_township: "",
+      addr_street: "",
+      addr_house_nmb: "",
+      tel: "",
+      liaison: "",
+      liaison_tel: "",
+      liaison_rel: "",
+      health_id: "",
+      micard: "",
+      mi_conpany: "",
+      mi_str: "",
+      mi_type: "",
+      mi_pacc_left: 0.0,
+      in_resource: "",
+      pid_out: "",
+      doctor_out: "",
+      in_notice_nmb: "",
+      doctor_in_charge: "",
+      doctor_visit_time: "",
+      all_sum: 0.0,
+      pre_pay_sum: 0.0,
+      pre_pay_left: 0.0,
+      pre_reg_flag: "",
+      green_flag: "",
+      in_cancel: "0",
+      in_time: "",
+      opcode: "",
+      diag_id: "",
+      diag_name: "",
+      diag_id2: "",
+      diag_name2: "",
+      diag_id3: "",
+      diag_name3: "",
+      in_purpose: "",
+      room: "",
+      bed_nmb: "",
+      bed_degree: "",
+      dept_code: "",
+      dept_code2: "",
+      out_hsp: "",
+      in_status: "", //入院病情状态
+      hbsag_flag: "",
+      hcv_flag: "",
+      hiv_flag: "",
+      allergen_type: "",
+      abo_blood_group: ""
     },
-    payType: "cash", //支付方式选择
+    item_code: "",
+    items_dictitem: [],
+    search_dictitem: null,
+    item_num: 1,
     headers: [
       {
         text: "项目名称",
@@ -285,27 +171,29 @@ export default {
   }),
 
   created() {
-    console.log("created");
+    this.topcode = get_regopcode().split("|")[0];
+    this.tgc = get_regopcode().split("|")[1];
   },
   mounted() {
     console.log("mounted");
   },
-   watch: {
-      search (val) {
-        val && val !== this.select && this.querySelections(val)
-      },
-    },
+  watch: {
+    search_dictitem(val) {
+      val && val !== this.select && this.querySelectionItems(val);
+    }
+  },
   methods: {
-    querySelections (v) {
-        this.loading = true
-        // Simulated ajax query
-        setTimeout(() => {
-          this.items = this.states.filter(e => {
-            return (e || '').toLowerCase().indexOf((v || '').toLowerCase()) > -1
-          })
-          this.loading = false
-        }, 500)
-      },
+    querySelectionItems(v) {
+      this.loading = true;
+      console.log("v=" + v + "v.length=" + v.length);
+      if (v.length < 2) {
+        return;
+      }
+      getdiag(v, this.topcode, this.tgc).then(data => {
+        this.items_dictitem = data;
+      });
+      this.loading = false;
+    },
     validate() {
       if (this.$refs.form.validate()) {
         this.snackbar = true;
@@ -324,20 +212,13 @@ export default {
       let _this = this;
       if (tpid.length == 8 || tpid.length == 11) {
         let thsp_code = process.env.VUE_APP_HSP_CODE;
-        fetch(
-          process.env.VUE_APP_REG_URL +
-            "/searchoutregcash/" +
-            tpid +
-            "/" +
-            thsp_code,
-          {
-            method: "get",
-            headers: {
-              Accept: "text/html",
-              "Content-Type": "application/json"
-            }
+        fetch(process.env.VUE_APP_REG_URL + "/searchoutregcash/" + tpid + "/" + thsp_code, {
+          method: "get",
+          headers: {
+            Accept: "text/html",
+            "Content-Type": "application/json"
           }
-        )
+        })
           .then(function(response) {
             if (response.ok) {
               //window.alert("---ok=");
@@ -347,7 +228,7 @@ export default {
             return response.json();
           })
           .then(function(data) {
-            console.log("data="+JSON.stringify(data))
+            console.log("data=" + JSON.stringify(data));
             let tresultCode = data.resultCode;
             //window.alert("tresultCode="+tresultCode)
             if (tresultCode === "0") {
@@ -369,27 +250,20 @@ export default {
       console.log(" this.out_reg=" + JSON.stringify(_this.out_reg));
       return _this.out_reg;
     },
-    getfeedetail(e){
+    getfeedetail(e) {
       console.log("getfeedetail pid=" + e);
       //门诊号规则:患者主索引8位，门诊号为11位，门诊号=主索引编号+3位数字，后3位数字为挂号的序号
       let tpid = e.trim();
       let _this = this;
       if (tpid.length == 8 || tpid.length == 11) {
         let thsp_code = process.env.VUE_APP_HSP_CODE;
-        fetch(
-          process.env.VUE_APP_REG_URL +
-            "/searchfeedetail/" +
-            tpid +
-            "/9/" +
-            thsp_code,
-          {
-            method: "get",
-            headers: {
-              Accept: "text/html",
-              "Content-Type": "application/json"
-            }
+        fetch(process.env.VUE_APP_REG_URL + "/searchfeedetail/" + tpid + "/9/" + thsp_code, {
+          method: "get",
+          headers: {
+            Accept: "text/html",
+            "Content-Type": "application/json"
           }
-        )
+        })
           .then(function(response) {
             if (response.ok) {
               //window.alert("---ok=");
@@ -399,12 +273,12 @@ export default {
             return response.json();
           })
           .then(function(data) {
-            console.log("data="+JSON.stringify(data))
+            console.log("data=" + JSON.stringify(data));
             let tresultCode = data.resultCode;
             //window.alert("tresultCode="+tresultCode)
             if (tresultCode === "0") {
               _this.fee_details = JSON.parse(data.outdata);
-              console.log(" this.out_reg=" + JSON.stringify(_this.fee_details));          
+              console.log(" this.out_reg=" + JSON.stringify(_this.fee_details));
             } else {
               window.alert("查询患者主索引信息失败1" + data.errorMsg);
             }

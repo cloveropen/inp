@@ -330,7 +330,8 @@ export default {
       let tjson_deposit = JSON.stringify(this.deposit);
       let tin_str = tjson_deposit + "|" + this.topcode + "|" +this.tgc;
       deposit4cash(tin_str).then(data => {
-        toutstr = data;
+        let tjson_obj = JSON.parse(data)
+        toutstr = tjson_obj.outdata;
         // this.valid_cashout = false;
         window.alert("预交金收款完成" + toutstr);
       });      
