@@ -127,9 +127,29 @@ export async function getdiag(tdiagname,topcode, tgc) {
         "item-text": tjson_obj[i].icd_name
       });
     }
-    return tdiag_list;
+    // return tdiag_list;
   });
   return tdiag_list;
+}
+//---------------------------通过名称关键字查询诊疗项目词典------------------------------------------------------------------
+export async function getdict_item(titemname,topcode, tgc) {
+  let titem_list = Array.of(); //诊断列表
+  let thsp_code = process.env.VUE_APP_HSP_CODE;
+  let turl = process.env.VUE_APP_INP_URL + "/searchdictitem/%"+ titemname +"%/"
+      + thsp_code + "/" + topcode + "/" + tgc;
+  let tencode_url = encodeURI(turl);
+  await fetch_data_api(tencode_url).then(data => {
+    //console.log("getdiag data=" + data);
+    let tjson_obj = JSON.parse(data);
+    for (let i = 0; i < tjson_obj.length; i++) {
+      titem_list.splice(i, 0, {
+        "item-value": tjson_obj[i].item_code,
+        "item-text": tjson_obj[i].item_name+"("+tjson_obj[i].real_price+")"
+      });
+    }
+    // return titem_list;
+  });
+  return titem_list;
 }
 //---------------------------查询门急诊医生收治病人入院通知单-----------------------------------------------------------------
 export async function getpatretain(topcode, tgc) {
@@ -184,10 +204,21 @@ export async function getdeposit_list(tnum_lmt, tname, topcode, tgc) {
 }
 //---------------------------用在院患者登记信息填充预交金基本信息-----------------------------------------------------------------
 export async function filldeposit(tpid, topcode, tgc) {
-  // tnum_lmt 表示限制返回记录数,tname 表示姓名关键字
   let tout_str = "";
   let thsp_code = process.env.VUE_APP_HSP_CODE;
   let turl = process.env.VUE_APP_INP_URL + "/filldeposit/"
+      + tpid + "/" + thsp_code + "/" + topcode + "/" + tgc;
+  let tencode_url = encodeURI(turl);
+  await fetch_data_api(tencode_url).then(data => {
+    tout_str = data;
+  });
+  return tout_str;
+}
+//---------------------------通过住院号查询在院患者信息和费用明细-----------------------------------------------------------------
+export async function schadmfee(tpid, topcode, tgc) {  
+  let tout_str = "";
+  let thsp_code = process.env.VUE_APP_HSP_CODE;
+  let turl = process.env.VUE_APP_INP_URL + "/schadmfee/"
       + tpid + "/" + thsp_code + "/" + topcode + "/" + tgc;
   let tencode_url = encodeURI(turl);
   await fetch_data_api(tencode_url).then(data => {
@@ -291,6 +322,16 @@ export function sch_weixin() {
 export async function save_adminreg(tin_str) {
   let tout_Str = ""; //成功返回住院号|ok,失败返回-1|失败原因
   let turl = process.env.VUE_APP_INP_URL + "/save_admreg";
+  await post_data_async(turl, tin_str).then(data => {
+    tout_Str = JSON.stringify(data);
+    return tout_Str;
+  });
+  return tout_Str;
+}
+//-------------------------入院登记确认-----------------------------------------------------------
+export async function fee_admreg_add(tin_str) {
+  let tout_Str = ""; //成功返回住院号|ok,失败返回-1|失败原因
+  let turl = process.env.VUE_APP_INP_URL + "/fee_admreg_add";
   await post_data_async(turl, tin_str).then(data => {
     tout_Str = JSON.stringify(data);
     return tout_Str;

@@ -5,7 +5,7 @@
         <v-layout row wrap>
           <v-flex d-flex>
             &emsp;&emsp;
-            <v-text-field v-model="admin_reg.pid" label="住院号" @input="getfeedetail($event)"></v-text-field>&emsp;&emsp;
+            <v-text-field v-model="admin_reg.pid" label="住院号" @input="pidChanged($event)"></v-text-field>&emsp;&emsp;
           </v-flex>
           <v-flex d-flex> <v-text-field v-model="admin_reg.patient_name" label="姓名" disabled></v-text-field>&emsp;&emsp; </v-flex>
           <v-flex d-flex> <v-text-field v-model="admin_reg.in_type" label="就诊类别" disabled></v-text-field>&emsp;&emsp; </v-flex>
@@ -58,10 +58,8 @@
         <v-layout row wrap no-gutters>
           <v-flex d-flex
             ><v-spacer></v-spacer>
-            <v-btn id="snap" :disabled="!valid" color="success">预 结 算</v-btn>
-            <v-btn :disabled="!valid" color="success" @click="validate">新增费用</v-btn>
-            <v-btn :disabled="!valid" color="success" @click="validate">确认记帐</v-btn>
-            <v-btn :disabled="!valid" color="success" @click="validate">查询明细</v-btn>
+            <v-btn :disabled="!valid" color="success" @click="fee_add">确认记帐</v-btn>
+            <v-btn :disabled="!valid" color="success" @click="sch_fee(admin_reg.pid)">查询明细</v-btn>
             <v-spacer></v-spacer
           ></v-flex>
         </v-layout>
@@ -78,7 +76,7 @@
 </template>
 
 <script>
-import { getdiag, get_regopcode } from "../scripts/adm_reg.js";
+import { get_regopcode, schadmfee, getdict_item, fee_admreg_add } from "../scripts/adm_reg.js";
 export default {
   data: () => ({
     valid: true,
@@ -153,6 +151,7 @@ export default {
     item_code: "",
     items_dictitem: [],
     search_dictitem: null,
+    loading: false,
     item_num: 1,
     headers: [
       {
@@ -189,7 +188,7 @@ export default {
       if (v.length < 2) {
         return;
       }
-      getdiag(v, this.topcode, this.tgc).then(data => {
+      getdict_item(v, this.topcode, this.tgc).then(data => {
         this.items_dictitem = data;
       });
       this.loading = false;
@@ -206,92 +205,47 @@ export default {
       this.$refs.form.resetValidation();
     },
     pidChanged(e) {
-      console.log("pid=" + e);
-      //门诊号规则:患者主索引8位，门诊号为11位，门诊号=主索引编号+3位数字，后3位数字为挂号的序号
+      console.log("pid=" + e);    
       let tpid = e.trim();
-      let _this = this;
-      if (tpid.length == 8 || tpid.length == 11) {
-        let thsp_code = process.env.VUE_APP_HSP_CODE;
-        fetch(process.env.VUE_APP_REG_URL + "/searchoutregcash/" + tpid + "/" + thsp_code, {
-          method: "get",
-          headers: {
-            Accept: "text/html",
-            "Content-Type": "application/json"
-          }
-        })
-          .then(function(response) {
-            if (response.ok) {
-              //window.alert("---ok=");
-            } else {
-              window.alert("查询患者信息失败error" + response.text);
-            }
-            return response.json();
-          })
-          .then(function(data) {
-            console.log("data=" + JSON.stringify(data));
-            let tresultCode = data.resultCode;
-            //window.alert("tresultCode="+tresultCode)
-            if (tresultCode === "0") {
-              _this.out_reg = JSON.parse(data.outdata);
-              console.log(" this.out_reg=" + JSON.stringify(_this.out_reg));
-              console.log(" this.out_reg.patientName=" + _this.out_reg.patientName);
-              //return toutreg;
-            } else {
-              window.alert("查询患者主索引信息失败1" + data.errorMsg);
-            }
-          })
-          .catch(function(err) {
-            window.alert("查询患者主索引信息查询error=" + err);
-          });
-      } else {
-        //window.alert("请输入正确的门诊号或患者主索引号");
-        return;
-      }
-      console.log(" this.out_reg=" + JSON.stringify(_this.out_reg));
-      return _this.out_reg;
+      schadmfee(tpid, this.topcode, this.tgc).then(data => {
+        console.log("schadmfee data=" + data);
+        //let tjson_data = JSON.parse(data);
+        let tlist = Array.of();
+        tlist = data.split("|"); 
+        console.log("-----tlist[0]=" + tlist[0]+ "   tlist[1]=" +tlist[1]);
+        let tjson_adm = JSON.parse(tlist[0]);
+        let tjson_fee = JSON.parse(tlist[1]);
+        this.admin_reg = tjson_adm;
+        this.fee_details = tjson_fee;
+
+      });
     },
-    getfeedetail(e) {
-      console.log("getfeedetail pid=" + e);
-      //门诊号规则:患者主索引8位，门诊号为11位，门诊号=主索引编号+3位数字，后3位数字为挂号的序号
-      let tpid = e.trim();
-      let _this = this;
-      if (tpid.length == 8 || tpid.length == 11) {
-        let thsp_code = process.env.VUE_APP_HSP_CODE;
-        fetch(process.env.VUE_APP_REG_URL + "/searchfeedetail/" + tpid + "/9/" + thsp_code, {
-          method: "get",
-          headers: {
-            Accept: "text/html",
-            "Content-Type": "application/json"
-          }
-        })
-          .then(function(response) {
-            if (response.ok) {
-              //window.alert("---ok=");
-            } else {
-              window.alert("查询患者信息失败error" + response.text);
-            }
-            return response.json();
-          })
-          .then(function(data) {
-            console.log("data=" + JSON.stringify(data));
-            let tresultCode = data.resultCode;
-            //window.alert("tresultCode="+tresultCode)
-            if (tresultCode === "0") {
-              _this.fee_details = JSON.parse(data.outdata);
-              console.log(" this.out_reg=" + JSON.stringify(_this.fee_details));
-            } else {
-              window.alert("查询患者主索引信息失败1" + data.errorMsg);
-            }
-          })
-          .catch(function(err) {
-            window.alert("查询患者主索引信息查询error=" + err);
-          });
-      } else {
-        //window.alert("请输入正确的门诊号或患者主索引号");
-        return;
+    sch_fee(tpid) {
+      schadmfee(tpid, this.topcode, this.tgc).then(data => {        
+        let tlist = Array.of();
+        tlist = data.split("|"); 
+        let tjson_adm = JSON.parse(tlist[0]);
+        let tjson_fee = JSON.parse(tlist[1]);
+        this.admin_reg = tjson_adm;
+        this.fee_details = tjson_fee;
+
+      });
+    },
+    fee_add() {
+      if (this.admin_reg.pid.length<10){
+        window.alert("请选择在院患者")
+        return ;
       }
-      console.log(" this.out_reg=" + JSON.stringify(_this.out_reg));
-      return _this.out_reg;
+      let tin_str = this.admin_reg.pid + "|" + this.item_code + "|" + this.item_num + "|" + process.env.VUE_APP_HSP_CODE + "|" + this.topcode + "|" +this.tgc;
+      fee_admreg_add(tin_str).then(data => {
+        console.log("fee_add data=" + data);
+        let tjson_fee = JSON.parse(data);
+        if (tjson_fee.ResultCode=='0'){
+          window.alert("补记住院收款成功");
+        }else{
+          window.alert("补记费用失败"+tjson_fee.ErrorMsg);
+        }
+      });
     }
     // ---------------------end methods----------------
   }
