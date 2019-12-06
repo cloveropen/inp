@@ -28,6 +28,51 @@ export async function getgender(topcode, tgc) {
   });
   return genders;
 }
+//---------------------------------------获取出院方式----------------------------------------------
+export async function getout_mode(topcode, tgc) {
+  let out_mode = Array.of();
+  let turl = process.env.VUE_APP_INP_URL + "/searchdicthealthterm/out_mode/" + topcode + "/" + tgc;
+  await fetch_data_api(turl).then(data => {
+    let tjson_obj = JSON.parse(data);
+    for (let i = 0; i < tjson_obj.length; i++) {
+      out_mode.splice(i, 0, {
+        "item-value": tjson_obj[i].termId,
+        "item-text": tjson_obj[i].termName
+      });
+    }
+  });
+  return out_mode;
+}
+//---------------------------------------获取治疗结果(医保出院原因)----------------------------------------------
+export async function gettreate_result(topcode, tgc) {
+  let treate_result = Array.of();
+  let turl = process.env.VUE_APP_INP_URL + "/searchdicthealthterm/mi_outreason/" + topcode + "/" + tgc;
+  await fetch_data_api(turl).then(data => {
+    let tjson_obj = JSON.parse(data);
+    for (let i = 0; i < tjson_obj.length; i++) {
+      treate_result.splice(i, 0, {
+        "item-value": tjson_obj[i].termId,
+        "item-text": tjson_obj[i].termName
+      });
+    }
+  });
+  return treate_result;
+}
+//---------------------------------------获取实际出院去向----------------------------------------------
+export async function getout_dest(topcode, tgc) {
+  let out_dest = Array.of();
+  let turl = process.env.VUE_APP_INP_URL + "/searchdicthealthterm/out_dest/" + topcode + "/" + tgc;
+  await fetch_data_api(turl).then(data => {
+    let tjson_obj = JSON.parse(data);
+    for (let i = 0; i < tjson_obj.length; i++) {
+      out_dest.splice(i, 0, {
+        "item-value": tjson_obj[i].termId,
+        "item-text": tjson_obj[i].termName
+      });
+    }
+  });
+  return out_dest;
+}
 //--------------------------查询操作员编号--------------------------------------------------------
 export function get_regopcode() {
   let user = JSON.parse(localStorage.getItem("user"));
@@ -328,7 +373,7 @@ export async function save_adminreg(tin_str) {
   });
   return tout_Str;
 }
-//-------------------------入院登记确认-----------------------------------------------------------
+//-------------------------补记住院费用-----------------------------------------------------------
 export async function fee_admreg_add(tin_str) {
   let tout_Str = ""; //成功返回住院号|ok,失败返回-1|失败原因
   let turl = process.env.VUE_APP_INP_URL + "/fee_admreg_add";

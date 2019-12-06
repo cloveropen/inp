@@ -2,294 +2,168 @@
   <v-container class="grey lighten-5">
     <v-form ref="form" v-model="valid" lazy-validation>
       <v-card class="mx-auto" max-width="99%" min-width="100%">
-        <v-img
-          class="white--text"
-          height="60px"
-          :src="require('../assets/outreg.jpg')"
-        >
+        <v-img class="white--text" height="60px" :src="require('../assets/outreg.jpg')">
           <v-card-title class="align-end fill-height">出院结算</v-card-title>
         </v-img>
         <v-card-text>
           <v-layout row wrap>
             &emsp;&emsp;
             <v-flex d-flex>
-              <v-text-field
-                v-model="out_reg.exPid"
-                label="住院号"
-                @input="expidChanged($event)"
-              >
-              </v-text-field>
+              <v-text-field v-model="adm_reg.pid" label="住院号" @input="pidChanged($event)"> </v-text-field>
             </v-flex>
             <v-flex d-flex>
               &emsp;&emsp;
-              <v-text-field
-                v-model="out_reg.patientName"
-                label="患者姓名"
-                readonly
-              ></v-text-field>
+              <v-text-field v-model="adm_reg.patient_name" label="患者姓名" readonly></v-text-field>
             </v-flex>
             <v-flex d-flex>
               &emsp;&emsp;
-              <v-select
-                v-model="out_reg.patientType"
-                label="患者类型"
-                readonly
-                :items="patient_types"
-                item-text="item-text"
-                item-value="item-value"
-                hide-details
-                prepend-icon="map"
-                single-line
-              ></v-select>
+              <v-text-field v-model="adm_reg.patient_type" label="患者类型" readonly></v-text-field>
             </v-flex>
             <v-flex d-flex>
               &emsp;&emsp;
-              <v-select
-                v-model="out_reg.patientType"
-                label="医疗类别"
-                readonly
-                :items="patient_types"
-                item-text="item-text"
-                item-value="item-value"
-                hide-details
-                prepend-icon="map"
-                single-line
-              ></v-select>
-            </v-flex>    
-          </v-layout>
-        <v-layout row wrap>                    
-            <v-flex d-flex>
-              &emsp;&emsp;
-              <v-text-field
-                v-model="out_reg.idcard" readonly
-                label="身份证号"                
-              ></v-text-field
-              >&emsp;&emsp;
-            </v-flex>          
-            <v-flex d-flex>
-              <v-text-field
-                v-model="out_reg.pid"
-                label="患者主索引"
-                readonly
-              ></v-text-field>
+              <v-text-field v-model="adm_reg.in_type" label="医疗类别" readonly></v-text-field>
             </v-flex>
             <v-flex d-flex>
               &emsp;&emsp;
-              <v-text-field
-                v-model="out_reg.idcard"
-                label="联系电话" readonly  
-              ></v-text-field
-              >&emsp;&emsp;
-            </v-flex>
-                
-            <v-flex d-flex>
-              &emsp;&emsp;
-              <v-select
-                v-model="out_reg.deptCode"
-                :items="dept_codes"
-                item-text="item-text"
-                item-value="item-value"
-                label="住院科室"
-                hide-details
-                prepend-icon="group_work"
-                single-line
-                readonly
-              ></v-select>
-            </v-flex>
-            <v-flex d-flex>
-              &emsp;&emsp;
-              <v-select
-                v-model="out_reg.deptCode"
-                :items="dept_codes"
-                item-text="item-text"
-                item-value="item-value"
-                label="主管医生"
-                hide-details
-                prepend-icon="group_work"
-                single-line
-                readonly
-              ></v-select>
-            </v-flex>        
-            <v-flex d-flex>
-              &emsp;&emsp;
-              <v-text-field
-                v-model="out_reg.addrHouseNmb"
-                label="备注"
-              ></v-text-field>
+              <v-text-field v-model="adm_reg.dept_code" label="住院科室" readonly></v-text-field>
             </v-flex>
           </v-layout>
-          <!-- <v-spacer></v-spacer>           -->         
+          <v-layout row wrap>
+            <v-flex d-flex>
+              &emsp;&emsp;
+              <v-text-field v-model="adm_reg.diag_name" label="出院诊断" readonly></v-text-field>
+            </v-flex>
+            <v-flex d-flex>
+              &emsp;&emsp;
+              <v-text-field v-model="adm_reg.diag_name2" label="第二诊断" readonly></v-text-field>
+            </v-flex>
+            <v-flex d-flex>
+              &emsp;&emsp;
+              <v-text-field v-model="adm_reg.diag_name3" label="第三诊断" readonly></v-text-field>
+            </v-flex>
+          </v-layout>
+          <v-layout row wrap>
+            <v-flex d-flex>
+              &emsp;&emsp;
+              <v-select :items="out_mode_list" v_model="discharge.out_mode" item-text="item-text" item-value="item-value" label="出院方式" hide-details prepend-icon="group_work"></v-select>
+            </v-flex>
+            <v-flex d-flex>
+              &emsp;&emsp;
+              <v-select :items="treate_result_list" v_model="discharge.treate_result" item-text="item-text" item-value="item-value" label="治疗结果" hide-details prepend-icon="group_work"></v-select>
+            </v-flex>
+            <v-flex d-flex>
+              &emsp;&emsp;
+              <v-select :items="out_dest_list" v_model="discharge.out_dest" item-text="item-text" item-value="item-value" label="出院去向" hide-details prepend-icon="group_work"></v-select>
+            </v-flex>
+            <v-flex d-flex>
+              &emsp;&emsp;
+              <v-radio-group row v-model="pay_type">
+                <v-flex d-flex><v-radio key="cash" label="正常出院" value="cash"></v-radio></v-flex>
+                <v-flex d-flex><v-radio key="wechat" label="中途结算" value="wechat"></v-radio></v-flex>
+              </v-radio-group>
+            </v-flex>
+          </v-layout>
+          <!-- <v-spacer></v-spacer>           -->
         </v-card-text>
         <v-card-actions class="justify-center">
           <v-layout row wrap no-gutters>
-          <v-flex d-flex><v-spacer></v-spacer></v-flex>
-          
-          <v-btn :disabled="!valid" color="success" @click="validate"
-            >查询</v-btn
-          >         
-          <v-btn
-            :disabled="!valid"
-            color="success"
-            @click="outregcashClicked($event)"
-            >出院登记</v-btn
-          >      
-          <v-btn
-            :disabled="!valid"
-            color="success"
-            @click="schweixinClicked($event)"
-          >出院结算
-          </v-btn>
-          <v-btn
-            :disabled="!valid"
-            color="success"
-            @click="schweixinClicked($event)"
-          >打印结算收据
-          </v-btn>
-          <v-flex d-flex><v-spacer></v-spacer></v-flex>
+            <v-flex d-flex><v-spacer></v-spacer></v-flex>
+
+            <v-btn :disabled="!valid" color="success" @click="validate">查询</v-btn>
+            <v-btn :disabled="!valid" color="success" @click="outregcashClicked($event)">出院登记</v-btn>
+            <v-btn :disabled="!valid" color="success" @click="schweixinClicked($event)">出院结算 </v-btn>
+            <v-btn :disabled="!valid" color="success" @click="schweixinClicked($event)">打印结算收据 </v-btn>
+            <v-flex d-flex><v-spacer></v-spacer></v-flex>
           </v-layout>
         </v-card-actions>
       </v-card>
-      
     </v-form>
- <v-expansion-panels popout focusable>
+    <v-expansion-panels popout focusable>
       <v-expansion-panel>
         <v-expansion-panel-header ripple><b>出院结算表</b></v-expansion-panel-header>
         <v-expansion-panel-content>
           <!-- -------------------------出院结算栏 --------------------------------------------- -->
-          <v-data-table
-            :headers="headers"
-            :items="fee_details"
-            :items-per-page="10"
-            class="elevation-1"
-          ></v-data-table>
+          <v-data-table :headers="headers" :items="fee_details" :items-per-page="10" class="elevation-1"></v-data-table>
         </v-expansion-panel-content>
       </v-expansion-panel>
       <v-expansion-panel>
-          <v-expansion-panel-header>费用明细表</v-expansion-panel-header>
+        <v-expansion-panel-header>费用明细表</v-expansion-panel-header>
         <v-expansion-panel-content>
           <!-- -------------------------明细表 --------------------------------------------- -->
-          <v-data-table
-            :headers="headers"
-            :items="fee_details"
-            :items-per-page="10"
-            class="elevation-1"
-          ></v-data-table>
+          <v-data-table :headers="headers" :items="fee_details" :items-per-page="10" class="elevation-1"></v-data-table>
         </v-expansion-panel-content>
       </v-expansion-panel>
       <v-expansion-panel>
         <v-expansion-panel-header>项目明细</v-expansion-panel-header>
         <v-expansion-panel-content>
           <!-- -------------------------项目明细栏 --------------------------------------------- -->
-          <v-data-table
-            :headers="headers"
-            :items="fee_details"
-            :items-per-page="10"
-            class="elevation-1"
-          ></v-data-table>
+          <v-data-table :headers="headers" :items="fee_details" :items-per-page="10" class="elevation-1"></v-data-table>
         </v-expansion-panel-content>
       </v-expansion-panel>
       <v-expansion-panel>
         <v-expansion-panel-header>分类表</v-expansion-panel-header>
         <v-expansion-panel-content>
           <!-- -------------------------分类表 --------------------------------------------- -->
-          <v-data-table
-            :headers="headers"
-            :items="fee_details"
-            :items-per-page="10"
-            class="elevation-1"
-          ></v-data-table>
+          <v-data-table :headers="headers" :items="fee_details" :items-per-page="10" class="elevation-1"></v-data-table>
         </v-expansion-panel-content>
       </v-expansion-panel>
       <v-expansion-panel>
         <v-expansion-panel-header>日清单</v-expansion-panel-header>
         <v-expansion-panel-content>
           <!-- -------------------------日清单 --------------------------------------------- -->
-          <v-data-table
-            :headers="headers"
-            :items="fee_details"
-            :items-per-page="10"
-            class="elevation-1"
-          ></v-data-table>
+          <v-data-table :headers="headers" :items="fee_details" :items-per-page="10" class="elevation-1"></v-data-table>
         </v-expansion-panel-content>
       </v-expansion-panel>
       <v-expansion-panel>
         <v-expansion-panel-header>预交金表</v-expansion-panel-header>
         <v-expansion-panel-content>
           <!-- -------------------------预交金表 --------------------------------------------- -->
-          <v-data-table
-            :headers="headers"
-            :items="fee_details"
-            :items-per-page="10"
-            class="elevation-1"
-          ></v-data-table>
+          <v-data-table :headers="headers" :items="fee_details" :items-per-page="10" class="elevation-1"></v-data-table>
         </v-expansion-panel-content>
       </v-expansion-panel>
       <v-expansion-panel>
         <v-expansion-panel-header>退费明细</v-expansion-panel-header>
         <v-expansion-panel-content>
           <!-- -------------------------退费明细 --------------------------------------------- -->
-          <v-data-table
-            :headers="headers"
-            :items="fee_details"
-            :items-per-page="10"
-            class="elevation-1"
-          ></v-data-table>
+          <v-data-table :headers="headers" :items="fee_details" :items-per-page="10" class="elevation-1"></v-data-table>
         </v-expansion-panel-content>
       </v-expansion-panel>
       <v-expansion-panel>
         <v-expansion-panel-header>出院结算召回记录</v-expansion-panel-header>
         <v-expansion-panel-content>
           <!-- -------------------------出院结算召回记录 --------------------------------------------- -->
-          <v-data-table
-            :headers="headers"
-            :items="fee_details"
-            :items-per-page="10"
-            class="elevation-1"
-          ></v-data-table>
+          <v-data-table :headers="headers" :items="fee_details" :items-per-page="10" class="elevation-1"></v-data-table>
         </v-expansion-panel-content>
       </v-expansion-panel>
-       <v-expansion-panel>
+      <v-expansion-panel>
         <v-expansion-panel-header>出院登记取消记录</v-expansion-panel-header>
         <v-expansion-panel-content>
           <!-- -------------------------出院登记取消记录 --------------------------------------------- -->
-          <v-data-table
-            :headers="headers"
-            :items="fee_details"
-            :items-per-page="10"
-            class="elevation-1"
-          ></v-data-table>
+          <v-data-table :headers="headers" :items="fee_details" :items-per-page="10" class="elevation-1"></v-data-table>
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
-
+    <v-card>
+      <v-card-title>
+        在院患者表
+        <div class="flex-grow-1"></div>
+        <v-text-field v-model="search_name" append-icon="search" label="姓名关键字" single-line hide-details></v-text-field>
+        <v-btn color="warning" dark @click="schdeposit_listname($event)">按姓名查询</v-btn>
+      </v-card-title>
+      <v-data-table :headers="headers_admreg" :items="admreg_list" item-key="seq" @click:row="select_admreg"></v-data-table>
+    </v-card>
     <v-row>
-          <v-col>
-            <v-card
-              class="pa-2"
-              outlined
-              style="background-color: lightgrey;"
-              tile
-            >
-              出院结算收据打印样式
-            </v-card>
-          </v-col>
-        </v-row>
+      <v-col>
+        <v-card class="pa-2" outlined style="background-color: lightgrey;" tile>
+          出院结算收据打印样式
+        </v-card>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 <script>
 import {
-  getpatient_type,
-  get_regopcode,
-  getgender,
-  //getnation,
-  //getin_type,
-  //getliaison_rels,
-  getdept_codes,
-  getdoctor_codes,
-  getprovs,
-  getcitys,
-  getcountys,
-  getstreets
+  get_regopcode, gettreate_result, getout_mode, getout_dest
   //getin_status,
   //getin_purpose
 } from "../scripts/adm_reg.js";
@@ -297,107 +171,161 @@ import {
 export default {
   data: () => ({
     valid: true,
-    nameRules: [
-      v => !!v || "姓名不能为空",
-      v => (v && v.length >= 2) || "姓名长度不能少于2个汉字"
-    ],
-    //barcodeRules: [
-    //  v => !!v || "条形码不能为空",
-    //  v => (v && v.length >= 13) || "条形码应该为13位数字"
-    //],
-    patient_types: [], //患者类别列表
-    genders: [], //性别列表
-    idcard_types: [], //身份证件类型列表
-    dept_codes: [], //就诊科室列表
-    doctor_codes: [], //专家号专家列表
-    reg_types: [], //挂号类别
-    addr_provs: [], //单位或住址(省份)
-    addr_citys: [], //单位或住址(市)
-    addr_countys: [], //单位或住址(区县)
-    addr_townships: [], //单位或住址(街道)
-    out_reg: {
-      hspCode: process.env.VUE_APP_HSP_CODE,
-      pid: "", //门诊号
-      pidType: "O", //患者标识类别
-      exPid: "", //条形码
-      patientName: "", //患者姓名
-      gender: "", //性别代码
-      ageY: "", // 年龄
-      ageM: "", //  年龄
-      ageD: "", //  年龄
-      patientType: "", //患者类型
-      regType: "pz", // 挂号类别
-      regPrice: 0.0, //挂号费
-      checkPrice: 0.0, //诊察费
-      visitPriority: "0", //就诊优先标志
-      deptCode: "", //就诊科室
-      doctorCode: "", //门诊接诊医生
-      idcard: "", //患者身份证号码
-      idcardType: "jmsfz", //患者身份证件类别
-      addrProv: process.env.VUE_APP_HSP_PROV, //地址
-      addrCity: process.env.VUE_APP_HSP_CITY,
-      addrCounty: process.env.VUE_APP_HSP_COUNTY,
-      addrTownship: "",
-      addrStreet: "",
-      addrHouseNmb: "",
-      miPaccLeft: 0.0,
-      miCompany: "",
-      miStr: "",
-      miType: "",
-      micard: "",
-      payType: "",
-      regOpcode: "", //挂号员
-      payCash: 0.0, //现金支付金额
-      payPacc: 0.0, //医保(农合)个人帐户支付金额
-      payFund: 0.0, //医保(农合)统筹支付金额
-      payNfc: 0.0, //移动支付金额
-      invoiceNmb: "", //挂号单收据流水号
-      flowNmb: "", //挂号单操作员流水号
-      mchIp: "", //本机局域网IP地址
-      ver: process.env.VUE_APP_VERSION //版本号
-    },
-    video: {},
-    canvas: {},
-    //captures: [],
-    capture_num: 0,
-    out_reg_pic: {
-      hspCode: process.env.VUE_APP_HSP_CODE,
+    topcode: "",
+    tgc: "",
+    pay_type: "cash",
+    out_mode_list: [],  //出院方式
+    treate_result_list: [], //治疗结果
+    out_dest_list: [], //实际出院去向
+    adm_reg: {
+      hsp_code: process.env.VUE_APP_HSP_CODE,
       pid: "",
-      exPid: "",
-      patientName: "",
+      ex_pid: "",
+      patient_name: "",
+      in_num: 1,
+      gender: "",
+      patient_type: "",
+      in_type: "",
       idcard: "",
-      healthId: "",
+      nation: "",
+      idcard_type: "",
+      birth_date: "",
+      age_y: 0,
+      age_m: 0,
+      age_d: 0,
+      addr_prov: process.env.VUE_APP_HSP_PROV,
+      addr_city: process.env.VUE_APP_HSP_CITY,
+      addr_county: process.env.VUE_APP_HSP_COUNTY,
+      addr_township: "",
+      addr_street: "",
+      addr_house_nmb: "",
+      tel: "",
+      liaison: "",
+      liaison_tel: "",
+      liaison_rel: "",
+      health_id: "",
       micard: "",
-      captureTime: "",
-      captureOpid: "",
-      mchIp: "",
-      pic1: "",
-      pic2: "",
-      pic3: "",
-      pic4: "",
-      pic5: "",
-      pic6: ""
-    }
-
+      mi_conpany: "",
+      mi_str: "",
+      mi_type: "",
+      mi_pacc_left: 0.0,
+      in_resource: "",
+      pid_out: "",
+      doctor_out: "",
+      in_notice_nmb: "",
+      doctor_in_charge: "",
+      doctor_visit_time: "",
+      all_sum: 0.0,
+      pre_pay_sum: 0.0,
+      pre_pay_left: 0.0,
+      pre_reg_flag: "",
+      green_flag: "",
+      in_cancel: "0",
+      in_time: "",
+      opcode: "",
+      diag_id: "",
+      diag_name: "",
+      diag_id2: "",
+      diag_name2: "",
+      diag_id3: "",
+      diag_name3: "",
+      in_purpose: "",
+      room: "",
+      bed_nmb: "",
+      bed_degree: "",
+      dept_code: "",
+      dept_code2: "",
+      out_hsp: "",
+      in_status: "", //入院病情状态
+      hbsag_flag: "",
+      hcv_flag: "",
+      hiv_flag: "",
+      allergen_type: "",
+      abo_blood_group: ""
+    },
+    discharge: {
+      seq: 0,
+      hsp_code: "",
+      pid: "",
+      ex_pid: "",
+      patient_name: "",
+      patient_type: "",
+      in_type: "",
+      idcard: "",
+      micard: "",
+      health_id: "",
+      mi_conpany: "",
+      mi_type: "",
+      mi_pacc_left: 0.0,
+      invoice_nmb: "",
+      flow_nmb: "",
+      in_time: "",
+      out_time: "",
+      settle_time: "",
+      opcode: "",
+      diag_id: "",
+      diag_name: "",
+      diag_id2: "",
+      diag_name2: "",
+      diag_id3: "",
+      diag_name3: "",
+      middle_flag: "",
+      dept_code_out: "",
+      dept_code_out2: "",
+      out_mode: "",
+      treate_result: "",
+      out_dest: "",
+      cancel_flag: "",
+      all_sum: 0.0,
+      cash_sum: 0.0,
+      pacc_sum: 0.0,
+      fund_sum: 0.0,
+      fund_nh_sum: 0.0,
+      fund_commeric: 0.0,
+      weixin_sum: 0.0,
+      alipay_sum: 0.0,
+      unionpay_sum: 0.0,
+      check_sum: 0.0,
+      voucher_sum: 0.0,
+      spec_sum: 0.0,
+      in_num: 0,
+      indays: 0,
+      pre_cash: 0.0,
+      pre_check: 0.0,
+      pre_weixin: 0.0,
+      pre_alipay: 0.0,
+      pre_union: 0.0,
+      change_cash: 0.0,
+      change_check: 0.0,
+      change_weixin: 0.0,
+      change_alipay: 0.0,
+      change_union: 0.0
+    },
+    headers_admreg: [
+      {
+        text: "姓名",
+        align: "left",
+        sortable: false,
+        value: "patient_name"
+      },
+      { text: "住院号", value: "pid" }
+    ],
+    admreg_list: []
   }),
   created() {
-    this.out_reg.regOpcode = get_regopcode();
-    this.patient_types = getpatient_type();
-    this.genders = getgender();
-    this.dept_codes = getdept_codes();
-    this.addr_provs = getprovs();
-    this.addr_citys = getcitys(process.env.VUE_APP_HSP_PROV);
-    this.addr_countys = getcountys(process.env.VUE_APP_HSP_CITY);
-    this.addr_townships = getstreets(process.env.VUE_APP_HSP_COUNTY);
+    this.topcode = get_regopcode().split("|")[0];
+    this.tgc = get_regopcode().split("|")[1];
   },
   mounted() {
-    this.video = this.$refs.video;
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-        this.video.srcObject = stream;
-        this.video.play();
-      });
-    }
+     gettreate_result(this.topcode, this.tgc).then(data => {
+      this.treate_result_list = data;
+    });
+    getout_mode(this.topcode, this.tgc).then(data => {
+      this.out_mode_list = data;
+    });
+    getout_dest(this.topcode, this.tgc).then(data => {
+      this.out_dest_list = data;
+    });    
   },
   methods: {
     validate() {
@@ -413,8 +341,8 @@ export default {
     },
     expidChanged(e) {
       let texpid = e;
-       console.log("texpid e=" + e);
-      if (texpid.length<10){
+      console.log("texpid e=" + e);
+      if (texpid.length < 10) {
         return;
       }
     },
@@ -436,20 +364,14 @@ export default {
       //   this.out_reg_pic.captureOpid = this.out_reg.regOpcode;
       //   // outreg_pic(this.out_reg_pic);
       // });
-      
     },
     outregweixinClicked(e) {
-      console.log("e=" + e.target.innerText);      
+      console.log("e=" + e.target.innerText);
     },
     schweixinClicked(e) {
       console.log("e=" + e.target.innerText);
     },
-    dept_codeChanged(e) {
-      let tdept_code = this.out_reg.deptCode;
-      console.log("dept_codeChanged e=" + e);
-      let tpost_tech = "1";
-      this.doctor_codes = getdoctor_codes(tdept_code, tpost_tech);
-    },
+
     reg_typeChanged(e) {
       console.log("reg_typeChanged e=" + e);
       // let treg_type = this.out_reg.regType;
@@ -457,58 +379,6 @@ export default {
       //   this.out_reg.regPrice = data[0];
       //   this.out_reg.checkPrice = data[1];
       // });
-    },
-    //------------------获取指定省份的市列表---------------------------
-    prov_Changed() {
-      let tprovid = this.out_reg.addrProv;
-      this.addr_citys = getcitys(tprovid);
-    },
-    //------------------获取指定市的区县列表---------------------------
-    city_Changed() {
-      let tcityid = this.out_reg.addrCity;
-      this.addr_countys = getcountys(tcityid);
-    },
-    //------------------获取指定区县的街道列表---------------------------
-    county_Changed() {
-      let tcountyid = this.out_reg.addrCounty;
-      this.addr_townships = getstreets(tcountyid);
-    },
-    capture() {
-      this.canvas = this.$refs.canvas;
-      var ctx = this.canvas.getContext("2d");
-      //console.log(this.$refs.canvas.toDataURL("image/png"));
-      ctx.drawImage(this.video, 0, 0, 640, 480);
-      //this.captures.push(this.$refs.canvas.toDataURL("image/png"));
-      switch (this.capture_num) {
-        case 0:
-          this.out_reg_pic.pic1 = this.$refs.canvas.toDataURL("image/png");
-          this.capture_num++;
-          break;
-        case 1:
-          this.out_reg_pic.pic2 = this.$refs.canvas.toDataURL("image/png");
-          this.capture_num++;
-          break;
-        case 2:
-          this.out_reg_pic.pic3 = this.$refs.canvas.toDataURL("image/png");
-          this.capture_num++;
-          break;
-        case 3:
-          this.out_reg_pic.pic4 = this.$refs.canvas.toDataURL("image/png");
-          this.capture_num++;
-          break;
-        case 4:
-          this.out_reg_pic.pic5 = this.$refs.canvas.toDataURL("image/png");
-          this.capture_num++;
-          break;
-        case 5:
-          this.out_reg_pic.pic6 = this.$refs.canvas.toDataURL("image/png");
-          this.capture_num++;
-          break;
-        default:
-          this.capture_num = 0;
-          this.out_reg_pic.pic1 = this.$refs.canvas.toDataURL("image/png");
-      }
-      //--
     }
     // ---------------------end methods----------------
   }
