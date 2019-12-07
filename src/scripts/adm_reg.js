@@ -73,6 +73,28 @@ export async function getout_dest(topcode, tgc) {
   });
   return out_dest;
 }
+//---------------------------查询在院患者10条最新列表-----------------------------------------------------------------
+export async function getadmreg_list(topcode, tgc) {
+  let tout_str = "";
+  let thsp_code = process.env.VUE_APP_HSP_CODE;
+  let turl = process.env.VUE_APP_INP_URL + "/searchadmregmulti/num/" + thsp_code + "/" + topcode + "/" + tgc;
+  let tencode_url = encodeURI(turl);    
+  await fetch_data_api(tencode_url).then(data => {
+    tout_str = data;
+  });
+  return tout_str;
+}
+//---------------------------按姓名关键字查询在院患者-----------------------------------------------------------------
+export async function getadmreg_list_name(tname,topcode, tgc) {
+  let tout_str = "";
+  let thsp_code = process.env.VUE_APP_HSP_CODE;
+  let turl = process.env.VUE_APP_INP_URL + "/searchadmregmulti/pname/%" + tname + "%|" + thsp_code + "/" + topcode + "/" + tgc;
+  let tencode_url = encodeURI(turl);    
+  await fetch_data_api(tencode_url).then(data => {
+    tout_str = data;
+  });
+  return tout_str;
+}
 //--------------------------查询操作员编号--------------------------------------------------------
 export function get_regopcode() {
   let user = JSON.parse(localStorage.getItem("user"));

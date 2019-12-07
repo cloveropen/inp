@@ -17,18 +17,34 @@
             </v-flex>
             <v-flex d-flex>
               &emsp;&emsp;
-              <v-text-field v-model="adm_reg.patient_type" label="患者类型" readonly></v-text-field>
+              <v-select
+                v-model="adm_reg.patient_type"
+                label="患者类型"
+                required
+                :items="patient_types"
+                item-text="item-text"
+                item-value="item-value"
+                hide-details
+                readonly
+              ></v-select>
             </v-flex>
             <v-flex d-flex>
               &emsp;&emsp;
-              <v-text-field v-model="adm_reg.in_type" label="医疗类别" readonly></v-text-field>
+              <v-select v-model="adm_reg.in_type" label="医疗类别" required :items="in_types" item-text="item-text" item-value="item-value" hide-details readonly></v-select>
             </v-flex>
             <v-flex d-flex>
               &emsp;&emsp;
-              <v-text-field v-model="adm_reg.dept_code" label="住院科室" readonly></v-text-field>
+              <v-select
+                v-model="adm_reg.dept_code"
+                :items="dept_codes"
+                item-text="item-text"
+                item-value="item-value"
+                label="住院科室"
+                hide-details
+                prepend-icon="group_work"
+                readonly
+              ></v-select>
             </v-flex>
-          </v-layout>
-          <v-layout row wrap>
             <v-flex d-flex>
               &emsp;&emsp;
               <v-text-field v-model="adm_reg.diag_name" label="出院诊断" readonly></v-text-field>
@@ -45,21 +61,45 @@
           <v-layout row wrap>
             <v-flex d-flex>
               &emsp;&emsp;
-              <v-select :items="out_mode_list" v_model="discharge.out_mode" item-text="item-text" item-value="item-value" label="出院方式" hide-details prepend-icon="group_work"></v-select>
+              <v-select
+                :items="out_mode_list"
+                v_model="discharge.out_mode"
+                item-text="item-text"
+                item-value="item-value"
+                label="出院方式"
+                hide-details
+                prepend-icon="group_work"
+              ></v-select>
             </v-flex>
             <v-flex d-flex>
               &emsp;&emsp;
-              <v-select :items="treate_result_list" v_model="discharge.treate_result" item-text="item-text" item-value="item-value" label="治疗结果" hide-details prepend-icon="group_work"></v-select>
+              <v-select
+                :items="treate_result_list"
+                v_model="discharge.treate_result"
+                item-text="item-text"
+                item-value="item-value"
+                label="治疗结果"
+                hide-details
+                prepend-icon="group_work"
+              ></v-select>
             </v-flex>
             <v-flex d-flex>
               &emsp;&emsp;
-              <v-select :items="out_dest_list" v_model="discharge.out_dest" item-text="item-text" item-value="item-value" label="出院去向" hide-details prepend-icon="group_work"></v-select>
+              <v-select
+                :items="out_dest_list"
+                v_model="discharge.out_dest"
+                item-text="item-text"
+                item-value="item-value"
+                label="出院去向"
+                hide-details
+                prepend-icon="group_work"
+              ></v-select>
             </v-flex>
             <v-flex d-flex>
               &emsp;&emsp;
-              <v-radio-group row v-model="pay_type">
-                <v-flex d-flex><v-radio key="cash" label="正常出院" value="cash"></v-radio></v-flex>
-                <v-flex d-flex><v-radio key="wechat" label="中途结算" value="wechat"></v-radio></v-flex>
+              <v-radio-group row v-model="middle_flag">
+                <v-flex d-flex><v-radio key="normal" label="正常出院" value="normal"></v-radio></v-flex>
+                <v-flex d-flex><v-radio key="middle" label="中途结算" value="middle"></v-radio></v-flex>
               </v-radio-group>
             </v-flex>
           </v-layout>
@@ -68,11 +108,28 @@
         <v-card-actions class="justify-center">
           <v-layout row wrap no-gutters>
             <v-flex d-flex><v-spacer></v-spacer></v-flex>
+            <v-radio-group row v-model="pay_type">
+              <v-flex d-flex><v-radio key="cash" label="现金" value="cash"></v-radio></v-flex>
+              <v-flex d-flex><v-radio key="wechat" label="微信" value="wechat"></v-radio></v-flex>
+              <v-flex d-flex><v-radio key="alipay" label="支付宝" value="alipay"></v-radio></v-flex>
+            </v-radio-group>
 
-            <v-btn :disabled="!valid" color="success" @click="validate">查询</v-btn>
+            <v-btn :disabled="!valid" color="success" >读健康卡</v-btn>
+            <v-btn :disabled="!valid" color="success" v-on:click="readcardClicked($event)">读医保卡</v-btn>
+            <v-btn :disabled="!valid" color="success" @click="validate">预结算</v-btn>
             <v-btn :disabled="!valid" color="success" @click="outregcashClicked($event)">出院登记</v-btn>
             <v-btn :disabled="!valid" color="success" @click="schweixinClicked($event)">出院结算 </v-btn>
             <v-btn :disabled="!valid" color="success" @click="schweixinClicked($event)">打印结算收据 </v-btn>
+            <v-btn :disabled="valid" color="success" @click="schweixinClicked($event)">
+              查询微信订单
+            </v-btn>
+            <v-flex d-flex><v-spacer></v-spacer></v-flex>
+          </v-layout>
+
+          <v-layout row wrap no-gutters>
+            <v-flex d-flex><v-spacer></v-spacer></v-flex>
+
+            
             <v-flex d-flex><v-spacer></v-spacer></v-flex>
           </v-layout>
         </v-card-actions>
@@ -83,63 +140,63 @@
         <v-expansion-panel-header ripple><b>出院结算表</b></v-expansion-panel-header>
         <v-expansion-panel-content>
           <!-- -------------------------出院结算栏 --------------------------------------------- -->
-          <v-data-table :headers="headers" :items="fee_details" :items-per-page="10" class="elevation-1"></v-data-table>
+          <v-data-table :headers="headers_discharge" :items="discharges" :items-per-page="10" class="elevation-1"></v-data-table>
         </v-expansion-panel-content>
       </v-expansion-panel>
       <v-expansion-panel>
         <v-expansion-panel-header>费用明细表</v-expansion-panel-header>
         <v-expansion-panel-content>
           <!-- -------------------------明细表 --------------------------------------------- -->
-          <v-data-table :headers="headers" :items="fee_details" :items-per-page="10" class="elevation-1"></v-data-table>
+          <v-data-table :headers="headers_fee_details" :items="fee_details" :items-per-page="10" class="elevation-1"></v-data-table>
         </v-expansion-panel-content>
       </v-expansion-panel>
       <v-expansion-panel>
         <v-expansion-panel-header>项目明细</v-expansion-panel-header>
         <v-expansion-panel-content>
           <!-- -------------------------项目明细栏 --------------------------------------------- -->
-          <v-data-table :headers="headers" :items="fee_details" :items-per-page="10" class="elevation-1"></v-data-table>
+          <v-data-table :headers="headers_item_details" :items="item_details" :items-per-page="10" class="elevation-1"></v-data-table>
         </v-expansion-panel-content>
       </v-expansion-panel>
       <v-expansion-panel>
         <v-expansion-panel-header>分类表</v-expansion-panel-header>
         <v-expansion-panel-content>
           <!-- -------------------------分类表 --------------------------------------------- -->
-          <v-data-table :headers="headers" :items="fee_details" :items-per-page="10" class="elevation-1"></v-data-table>
+          <v-data-table :headers="headers_cate_details" :items="cate_details" :items-per-page="10" class="elevation-1"></v-data-table>
         </v-expansion-panel-content>
       </v-expansion-panel>
       <v-expansion-panel>
         <v-expansion-panel-header>日清单</v-expansion-panel-header>
         <v-expansion-panel-content>
           <!-- -------------------------日清单 --------------------------------------------- -->
-          <v-data-table :headers="headers" :items="fee_details" :items-per-page="10" class="elevation-1"></v-data-table>
+          <v-data-table :headers="headers_day_details" :items="day_details" :items-per-page="10" class="elevation-1"></v-data-table>
         </v-expansion-panel-content>
       </v-expansion-panel>
       <v-expansion-panel>
         <v-expansion-panel-header>预交金表</v-expansion-panel-header>
         <v-expansion-panel-content>
           <!-- -------------------------预交金表 --------------------------------------------- -->
-          <v-data-table :headers="headers" :items="fee_details" :items-per-page="10" class="elevation-1"></v-data-table>
+          <v-data-table :headers="headers_deposit_details" :items="deposit_details" :items-per-page="10" class="elevation-1"></v-data-table>
         </v-expansion-panel-content>
       </v-expansion-panel>
       <v-expansion-panel>
         <v-expansion-panel-header>退费明细</v-expansion-panel-header>
         <v-expansion-panel-content>
           <!-- -------------------------退费明细 --------------------------------------------- -->
-          <v-data-table :headers="headers" :items="fee_details" :items-per-page="10" class="elevation-1"></v-data-table>
+          <v-data-table :headers="headers_fee_details" :items="fee_cancel_details" :items-per-page="10" class="elevation-1"></v-data-table>
         </v-expansion-panel-content>
       </v-expansion-panel>
       <v-expansion-panel>
         <v-expansion-panel-header>出院结算召回记录</v-expansion-panel-header>
         <v-expansion-panel-content>
           <!-- -------------------------出院结算召回记录 --------------------------------------------- -->
-          <v-data-table :headers="headers" :items="fee_details" :items-per-page="10" class="elevation-1"></v-data-table>
+          <v-data-table :headers="headers_discharge" :items="discharge_cancels" :items-per-page="10" class="elevation-1"></v-data-table>
         </v-expansion-panel-content>
       </v-expansion-panel>
       <v-expansion-panel>
         <v-expansion-panel-header>出院登记取消记录</v-expansion-panel-header>
         <v-expansion-panel-content>
           <!-- -------------------------出院登记取消记录 --------------------------------------------- -->
-          <v-data-table :headers="headers" :items="fee_details" :items-per-page="10" class="elevation-1"></v-data-table>
+          <v-data-table :headers="headers_admreg_cancel" :items="adm_reg_cancels" :items-per-page="10" class="elevation-1"></v-data-table>
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
@@ -148,7 +205,7 @@
         在院患者表
         <div class="flex-grow-1"></div>
         <v-text-field v-model="search_name" append-icon="search" label="姓名关键字" single-line hide-details></v-text-field>
-        <v-btn color="warning" dark @click="schdeposit_listname($event)">按姓名查询</v-btn>
+        <v-btn color="warning" dark @click="sch_admreg_listname($event)">按姓名查询</v-btn>
       </v-card-title>
       <v-data-table :headers="headers_admreg" :items="admreg_list" item-key="seq" @click:row="select_admreg"></v-data-table>
     </v-card>
@@ -163,9 +220,16 @@
 </template>
 <script>
 import {
-  get_regopcode, gettreate_result, getout_mode, getout_dest
-  //getin_status,
-  //getin_purpose
+  get_regopcode,
+  gettreate_result,
+  getout_mode,
+  getout_dest,
+  getadmreg_list,
+  getadmreg_list_name,
+  fetch_data_api,
+  getpatient_type,
+  getin_type,
+  getdept_codes
 } from "../scripts/adm_reg.js";
 
 export default {
@@ -174,7 +238,11 @@ export default {
     topcode: "",
     tgc: "",
     pay_type: "cash",
-    out_mode_list: [],  //出院方式
+    middle_flag: "normal",
+    patient_types: [], //患者类别列表
+    dept_codes: [], //就诊科室列表
+    in_types: [], //入院医疗类别
+    out_mode_list: [], //出院方式
     treate_result_list: [], //治疗结果
     out_dest_list: [], //实际出院去向
     adm_reg: {
@@ -308,16 +376,124 @@ export default {
         sortable: false,
         value: "patient_name"
       },
-      { text: "住院号", value: "pid" }
+      { text: "住院号", value: "pid" },
+      { text: "总费用", value: "all_sum" },
+      { text: "预交金余额", value: "pre_pay_left" },
+      { text: "人员类别", value: "patient_type" },
+      { text: "医疗类别", value: "in_type" },
+      { text: "入院时间", value: "in_time" },
+      { text: "住院科室", value: "dept_code" }
     ],
-    admreg_list: []
+    headers_admreg_cancel: [
+      {
+        text: "姓名",
+        align: "left",
+        sortable: false,
+        value: "patient_name"
+      },
+      { text: "住院号", value: "pid" },
+      { text: "总费用", value: "all_sum" },
+      { text: "预交金余额", value: "pre_pay_left" },
+      { text: "人员类别", value: "patient_type" },
+      { text: "医疗类别", value: "in_type" },
+      { text: "入院时间", value: "in_time" },
+      { text: "住院科室", value: "dept_code" },
+      { text: "取消出院登记时间", value: "cancel_time" }
+    ],
+    headers_discharge: [ //出院结算表头
+      {
+        text: "姓名",
+        align: "left",
+        sortable: false,
+        value: "patient_name"
+      },
+      { text: "住院号", value: "pid" },
+      { text: "总费用", value: "all_sum" }
+    ],
+    headers_fee_details: [   //费用明细表头
+      {
+        text: "项目名称",
+        align: "left",
+        sortable: false,
+        value: "item_name"
+      },
+      { text: "单价", value: "real_price" },
+      { text: "数量", value: "quantity" },
+      { text: "天数", value: "days" },
+      { text: "开具时间", value: "cal_time" },
+      { text: "医师", value: "cal_opcode" },
+      { text: "收款时间", value: "cashtime" },
+      { text: "收款人", value: "	cash_opcode" },
+      { text: "执行时间", value: "exec_time" },
+      { text: "执行人", value: "exec_opcode" }
+    ],
+    headers_item_details: [   //项目明细表头
+      {
+        text: "项目名称",
+        align: "left",
+        sortable: false,
+        value: "item_name"
+      },
+      { text: "当前单价", value: "real_price" },
+      { text: "数量", value: "quantity" },     
+      { text: "金额", value: "all_sum" }     
+    ],
+    headers_cate_details: [   //分类表头
+      {
+        text: "类别名称",
+        align: "left",
+        sortable: false,
+        value: "cate_name"
+      },
+      { text: "数量", value: "quantity" },     
+      { text: "金额", value: "all_sum" }     
+    ],
+    headers_day_details: [   //日清单表头
+      {
+        text: "项目名称",
+        align: "left",
+        sortable: false,
+        value: "item_name"
+      },
+      { text: "数量", value: "quantity" },   
+      { text: "金额", value: "all_sum" },
+      { text: "日期", value: "cashtime" },
+      { text: "医保等级", value: "mi_degree" },
+      { text: "项目分类", value: "item_class" }
+    ],
+    headers_deposit_details: [
+      {
+        text: "姓名",
+        align: "left",
+        sortable: false,
+        value: "patient_name"
+      },
+      { text: "住院号", value: "pid" },
+      { text: "总费用", value: "all_sum" },
+      { text: "预交金余额", value: "pre_pay_left" },
+      { text: "人员类别", value: "patient_type" },
+      { text: "医疗类别", value: "in_type" },
+      { text: "入院时间", value: "in_time" },
+      { text: "住院科室", value: "dept_code" }
+    ],
+    admreg_list: [],
+    discharges: [],
+    fee_details: [],
+    item_details: [],
+    cate_details: [],
+    day_details: [],
+    deposit_details: [],
+    fee_cancel_details: [],
+    discharge_cancels: [],
+    adm_reg_cancels: [],
+    search_name: ""
   }),
   created() {
     this.topcode = get_regopcode().split("|")[0];
     this.tgc = get_regopcode().split("|")[1];
   },
   mounted() {
-     gettreate_result(this.topcode, this.tgc).then(data => {
+    gettreate_result(this.topcode, this.tgc).then(data => {
       this.treate_result_list = data;
     });
     getout_mode(this.topcode, this.tgc).then(data => {
@@ -325,7 +501,19 @@ export default {
     });
     getout_dest(this.topcode, this.tgc).then(data => {
       this.out_dest_list = data;
-    });    
+    });
+    getadmreg_list(this.topcode, this.tgc).then(data => {
+      this.admreg_list = JSON.parse(data);
+    });
+    getpatient_type(this.topcode, this.tgc).then(data => {
+      this.patient_types = data;
+    });
+    getin_type(this.topcode, this.tgc).then(data => {
+      this.in_types = data;
+    });
+    getdept_codes(this.topcode, this.tgc).then(data => {
+      this.dept_codes = data;
+    });
   },
   methods: {
     validate() {
@@ -339,12 +527,18 @@ export default {
     resetValidation() {
       this.$refs.form.resetValidation();
     },
-    expidChanged(e) {
-      let texpid = e;
-      console.log("texpid e=" + e);
-      if (texpid.length < 10) {
+    pidChanged(e) {
+      let tpid = e;
+      if (tpid.length < 10) {
         return;
       }
+      let tinstr = tpid + "|" + process.env.VUE_APP_HSP_CODE;
+      let turl = process.env.VUE_APP_INP_URL + "/searchadmregmulti/pid/" + tinstr + "/" + this.topcode + "/" + this.tgc;
+      fetch_data_api(turl).then(data => {
+        console.log("pidChanged data=" + data);
+        let tjson_data = JSON.parse(data);
+        this.adm_reg = tjson_data;
+      });
     },
     readcardClicked(e) {
       console.log("e=" + e.target.innerText);
@@ -352,18 +546,6 @@ export default {
     },
     outregcashClicked(e) {
       console.log("e=" + e.target.innerText);
-      // outreg_cash(this.out_reg).then(data =>{
-      //   this.out_reg.pid = data;
-      //   console.log("outregcashClicked this.out_reg_pic.pid=" +this.out_reg_pic.pid);
-      //   this.out_reg_pic.pid = this.out_reg.pid;
-      //   this.out_reg_pic.exPid = this.out_reg.exPid;
-      //   this.out_reg_pic.patientName = this.out_reg.patientName;
-      //   this.out_reg_pic.idcard = this.out_reg.idcard;
-      //   this.out_reg_pic.healthId = this.out_reg.healthId;
-      //   this.out_reg_pic.micard = this.out_reg.micard;
-      //   this.out_reg_pic.captureOpid = this.out_reg.regOpcode;
-      //   // outreg_pic(this.out_reg_pic);
-      // });
     },
     outregweixinClicked(e) {
       console.log("e=" + e.target.innerText);
@@ -371,14 +553,27 @@ export default {
     schweixinClicked(e) {
       console.log("e=" + e.target.innerText);
     },
-
-    reg_typeChanged(e) {
-      console.log("reg_typeChanged e=" + e);
-      // let treg_type = this.out_reg.regType;
-      // getregprice(treg_type).then(data => {
-      //   this.out_reg.regPrice = data[0];
-      //   this.out_reg.checkPrice = data[1];
-      // });
+    sch_admreg_listname(e) {
+      console.log("点击" + e.target.innerText);
+      let tname = this.search_name;
+      if (tname.trim().length < 1) {
+        window.alert("按姓名查询,姓名不能为空");
+        return;
+      } else {
+        getadmreg_list_name(tname, this.topcode, this.tgc).then(data => {
+          this.admreg_list = JSON.parse(data);
+        });
+      }
+    },
+    select_admreg(item) {
+      let tpid = item.pid;
+      let tinstr = tpid + "|" + process.env.VUE_APP_HSP_CODE;
+      let turl = process.env.VUE_APP_INP_URL + "/searchadmregmulti/pid/" + tinstr + "/" + this.topcode + "/" + this.tgc;
+      fetch_data_api(turl).then(data => {
+        // console.log("select_admreg data=" + data);
+        let tjson_data = JSON.parse(data);
+        this.adm_reg = tjson_data;
+      });
     }
     // ---------------------end methods----------------
   }
