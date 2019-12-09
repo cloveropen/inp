@@ -114,9 +114,9 @@
               <v-flex d-flex><v-radio key="alipay" label="支付宝" value="alipay"></v-radio></v-flex>
             </v-radio-group>
 
-            <v-btn :disabled="!valid" color="success" >读健康卡</v-btn>
-            <v-btn :disabled="!valid" color="success" v-on:click="readcardClicked($event)">读医保卡</v-btn>
-            <v-btn :disabled="!valid" color="success" @click="validate">预结算</v-btn>
+            <v-btn color="success" >读健康卡</v-btn>
+            <v-btn color="success" v-on:click="readcardClicked($event)">读医保卡</v-btn>
+            <v-btn :disabled="!valid" color="success" @click="presettle">预结算</v-btn>
             <v-btn :disabled="!valid" color="success" @click="outregcashClicked($event)">出院登记</v-btn>
             <v-btn :disabled="!valid" color="success" @click="schweixinClicked($event)">出院结算 </v-btn>
             <v-btn :disabled="!valid" color="success" @click="schweixinClicked($event)">打印结算收据 </v-btn>
@@ -128,7 +128,6 @@
 
           <v-layout row wrap no-gutters>
             <v-flex d-flex><v-spacer></v-spacer></v-flex>
-
             
             <v-flex d-flex><v-spacer></v-spacer></v-flex>
           </v-layout>
@@ -434,9 +433,11 @@ export default {
         sortable: false,
         value: "item_name"
       },
-      { text: "当前单价", value: "real_price" },
-      { text: "数量", value: "quantity" },     
-      { text: "金额", value: "all_sum" }     
+      { text: "平均单价", value: "price" },
+      { text: "数量合计", value: "item_num" },
+      { text: "单位", value: "units" },
+      { text: "金额", value: "item_sum" },
+      { text: "项目编码", value: "item_code" }
     ],
     headers_cate_details: [   //分类表头
       {
@@ -469,12 +470,18 @@ export default {
         value: "patient_name"
       },
       { text: "住院号", value: "pid" },
-      { text: "总费用", value: "all_sum" },
-      { text: "预交金余额", value: "pre_pay_left" },
-      { text: "人员类别", value: "patient_type" },
-      { text: "医疗类别", value: "in_type" },
-      { text: "入院时间", value: "in_time" },
-      { text: "住院科室", value: "dept_code" }
+      { text: "预交金", value: "pay_sum" },
+      { text: "支付时间", value: "pay_time" },
+      { text: "操作员", value: "opcode" },
+      { text: "现金", value: "pay_cash" },
+      { text: "微信", value: "pay_weixin" },
+      { text: "支付宝", value: "pay_alipay" },
+      { text: "银联", value: "pay_union" },
+      { text: "支票", value: "pay_chk" },
+      { text: "其他支付", value: "pay_other" },
+      { text: "备注", value: "remark" },
+      { text: "开户行", value: "bank" },
+      { text: "帐号", value: "account" }
     ],
     admreg_list: [],
     discharges: [],
@@ -574,6 +581,46 @@ export default {
         let tjson_data = JSON.parse(data);
         this.adm_reg = tjson_data;
       });
+    },
+    presettle() {
+      let tpid = this.adm_reg.pid;
+      let thsp_code = process.env.VUE_APP_HSP_CODE;
+      //查询费用明细表
+      let tinstr = tpid + "|" + thsp_code;
+      let turl = process.env.VUE_APP_INP_URL + "/searchfee_multi/cash_in/" + tinstr + "/" + this.topcode + "/" + this.tgc;
+      fetch_data_api(turl).then(data => {
+        // console.log("select_admreg data=" + data);
+        let tjson_data = JSON.parse(data);
+        this.fee_details = tjson_data;
+      });
+      //查询项目明细表(单项目汇总表)
+      tinstr = tpid + "|" + thsp_code;
+      turl = process.env.VUE_APP_INP_URL + "/searchfee_multi/cash_in_by_item/" + tinstr + "/" + this.topcode + "/" + this.tgc;
+      fetch_data_api(turl).then(data => {
+        let tjson_data = JSON.parse(data);
+        this.item_details = tjson_data;
+      });
+      //查询费用分类表
+
+      //查询日清单
+      //查询预交金表
+      tinstr = tpid + "|" + thsp_code+"|"+"in";
+      turl = process.env.VUE_APP_INP_URL + "/searchdepositmulti/pid/" + tinstr + "/" + this.topcode + "/" + this.tgc;
+      fetch_data_api(turl).then(data => {
+        console.log("查询预交金表 data=" + data);
+        let tjson_data = JSON.parse(data);
+        this.deposit_details = tjson_data;
+      });
+      //查询退费明细
+      turl = process.env.VUE_APP_INP_URL + "/searchfee_multi/cash_in_back/" + tinstr + "/" + this.topcode + "/" + this.tgc;
+      fetch_data_api(turl).then(data => {
+        let tjson_data = JSON.parse(data);
+        this.fee_cancel_details = tjson_data;
+      });
+      //查询出院结算召回记录
+      //查询出院登记取消记录
+      //出院预结算操作,计算返回金额
+
     }
     // ---------------------end methods----------------
   }
