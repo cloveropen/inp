@@ -192,7 +192,7 @@
         </v-expansion-panel-content>
       </v-expansion-panel>
       <v-expansion-panel>
-        <v-expansion-panel-header>出院登记取消记录</v-expansion-panel-header>
+        <v-expansion-panel-header>出院登记信息</v-expansion-panel-header>
         <v-expansion-panel-content>
           <!-- -------------------------出院登记取消记录 --------------------------------------------- -->
           <v-data-table :headers="headers_admreg_cancel" :items="adm_reg_cancels" :items-per-page="10" class="elevation-1"></v-data-table>
@@ -442,25 +442,26 @@ export default {
     headers_cate_details: [   //分类表头
       {
         text: "类别名称",
-        align: "left",
+        align: "center",
         sortable: false,
         value: "cate_name"
       },
-      { text: "数量", value: "quantity" },     
-      { text: "金额", value: "all_sum" }     
+      { text: "金额", value: "cate_sum" }     
     ],
     headers_day_details: [   //日清单表头
       {
-        text: "项目名称",
+        text: "日期",
         align: "left",
         sortable: false,
-        value: "item_name"
+        value: "day"
       },
-      { text: "数量", value: "quantity" },   
-      { text: "金额", value: "all_sum" },
-      { text: "日期", value: "cashtime" },
+      { text: "日金额", value: "day_sum" },   
+      { text: "项目名称", value: "item_name" },
+      { text: "数量", value: "quantity" },
+      { text: "单位", value: "units" },
+      { text: "单价", value: "price" },
       { text: "医保等级", value: "mi_degree" },
-      { text: "项目分类", value: "item_class" }
+      { text: "项目分类", value: "fee_type" }
     ],
     headers_deposit_details: [
       {
@@ -601,24 +602,50 @@ export default {
         this.item_details = tjson_data;
       });
       //查询费用分类表
-
+      tinstr = tpid + "|" + thsp_code + "|" + this.topcode ;
+      turl = process.env.VUE_APP_INP_URL + "/searchfee_multi/cash_in_by_cateid/" + tinstr + "/" + this.topcode + "/" + this.tgc;
+      fetch_data_api(turl).then(data => {
+        let tjson_data = JSON.parse(data);
+        this.cate_details = tjson_data;
+      });
       //查询日清单
+      tinstr = tpid + "|" + thsp_code + "|" + this.topcode ;
+      turl = process.env.VUE_APP_INP_URL + "/searchfee_multi/cash_in_by_day/" + tinstr + "/" + this.topcode + "/" + this.tgc;
+      fetch_data_api(turl).then(data => {
+        let tjson_data = JSON.parse(data);
+        this.day_details = tjson_data;
+      });
       //查询预交金表
       tinstr = tpid + "|" + thsp_code+"|"+"in";
       turl = process.env.VUE_APP_INP_URL + "/searchdepositmulti/pid/" + tinstr + "/" + this.topcode + "/" + this.tgc;
       fetch_data_api(turl).then(data => {
-        console.log("查询预交金表 data=" + data);
+        //console.log("查询预交金表 data=" + data);
         let tjson_data = JSON.parse(data);
         this.deposit_details = tjson_data;
       });
       //查询退费明细
+      tinstr = tpid + "|" + thsp_code;
       turl = process.env.VUE_APP_INP_URL + "/searchfee_multi/cash_in_back/" + tinstr + "/" + this.topcode + "/" + this.tgc;
       fetch_data_api(turl).then(data => {
         let tjson_data = JSON.parse(data);
         this.fee_cancel_details = tjson_data;
       });
       //查询出院结算召回记录
+      tinstr = tpid + "|" + thsp_code;
+      turl = process.env.VUE_APP_INP_URL + "/searchdischargemulti/pid/" + tinstr + "/" + this.topcode + "/" + this.tgc;
+      fetch_data_api(turl).then(data => {
+        // console.log("查询出院结算召回记录 data=" + data);
+        let tjson_data = JSON.parse(data);
+        this.discharge_cancels = tjson_data;
+      });
       //查询出院登记取消记录
+      tinstr = tpid + "|" + thsp_code;
+      turl = process.env.VUE_APP_INP_URL + "/searchadmchkoutmulti/pid/" + tinstr + "/" + this.topcode + "/" + this.tgc;
+      fetch_data_api(turl).then(data => {
+        console.log("查询出院登记取消记录 data=" + data);
+        let tjson_data = JSON.parse(data);
+        this.adm_reg_cancels = tjson_data;
+      });
       //出院预结算操作,计算返回金额
 
     }
