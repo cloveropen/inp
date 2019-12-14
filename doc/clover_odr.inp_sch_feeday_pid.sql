@@ -52,6 +52,6 @@ BEGIN
 	---------------------------------
 	---返回json字符串数组
 	
-    RETURN tout_str;
+    RETURN coalesce(tout_str,'[{}]');
 END;
 $cloveropen$;

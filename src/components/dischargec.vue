@@ -117,8 +117,8 @@
             <v-btn color="success" >读健康卡</v-btn>
             <v-btn color="success" v-on:click="readcardClicked($event)">读医保卡</v-btn>
             <v-btn :disabled="!valid" color="success" @click="presettle">预结算</v-btn>
-            <v-btn :disabled="!valid" color="success" @click="outregcashClicked($event)">出院登记</v-btn>
-            <v-btn :disabled="!valid" color="success" @click="schweixinClicked($event)">出院结算 </v-btn>
+            <v-btn :disabled="!valid" color="success" @click="discharge_reg($event)">出院登记</v-btn>
+            <v-btn :disabled="!valid" color="success" @click="discharge_commit($event)">出院结算 </v-btn>
             <v-btn :disabled="!valid" color="success" @click="schweixinClicked($event)">打印结算收据 </v-btn>
             <v-btn :disabled="valid" color="success" @click="schweixinClicked($event)">
               查询微信订单
@@ -348,12 +348,7 @@ export default {
       pacc_sum: 0.0,
       fund_sum: 0.0,
       fund_nh_sum: 0.0,
-      fund_commeric: 0.0,
-      weixin_sum: 0.0,
-      alipay_sum: 0.0,
-      unionpay_sum: 0.0,
-      check_sum: 0.0,
-      voucher_sum: 0.0,
+      fund_commeric: 0.0,     
       spec_sum: 0.0,
       in_num: 0,
       indays: 0,
@@ -362,6 +357,8 @@ export default {
       pre_weixin: 0.0,
       pre_alipay: 0.0,
       pre_union: 0.0,
+      pre_voucher: 0.00,
+      pre_other: 0.00,
       change_cash: 0.0,
       change_check: 0.0,
       change_weixin: 0.0,
@@ -407,7 +404,25 @@ export default {
         value: "patient_name"
       },
       { text: "住院号", value: "pid" },
-      { text: "总费用", value: "all_sum" }
+      { text: "退现金", value: "change_cash" },
+      { text: "退支票", value: "change_check" },
+      { text: "退微信", value: "change_weixin" },
+      { text: "退支付宝", value: "change_alipay" },
+      { text: "退银联", value: "change_union" },
+      { text: "总费用", value: "all_sum" },
+      { text: "现金支付", value: "cash_sum" },
+      { text: "个人帐户", value: "pacc_sum" },
+      { text: "医保统筹", value: "fund_sum" },
+      { text: "农合统筹", value: "fund_nh_sum" },
+      { text: "商业保险", value: "fund_commeric" },
+      { text: "特批欠款", value: "spec_sum" },
+      { text: "预交现金", value: "pre_cash" },
+      { text: "预交支票", value: "pre_check" },
+      { text: "预交微信", value: "pre_weixin" },
+      { text: "预交支付宝", value: "pre_alipay" },
+      { text: "预交银联", value: "pre_union" },
+      { text: "预交抵用券", value: "pre_voucher" },
+      { text: "预交其他", value: "pre_other" }
     ],
     headers_fee_details: [   //费用明细表头
       {
@@ -642,12 +657,50 @@ export default {
       tinstr = tpid + "|" + thsp_code;
       turl = process.env.VUE_APP_INP_URL + "/searchadmchkoutmulti/pid/" + tinstr + "/" + this.topcode + "/" + this.tgc;
       fetch_data_api(turl).then(data => {
-        console.log("查询出院登记取消记录 data=" + data);
+        // console.log("查询出院登记取消记录 data=" + data);
         let tjson_data = JSON.parse(data);
         this.adm_reg_cancels = tjson_data;
       });
       //出院预结算操作,计算返回金额
-
+      //入参:住院号|医院编号|是否中途结算|出院方式|治疗结果|出院去向|操作员
+      tinstr = tpid + "|" + thsp_code + "|" + this.discharge.middle_flag + "|" + this.discharge.out_mode+ "|" + this.discharge.treate_result + "|" + this.discharge.out_dest  + "|" + this.topcode;
+      turl = process.env.VUE_APP_INP_URL + "/dischargepre/" + tinstr + "/" + this.topcode + "/" + this.tgc;
+      fetch_data_api(turl).then(data => {
+        console.log("出院预结算操作,计算返回金额 data=" + data);
+        let tlist = Array.of();
+        tlist = data.split("|");
+        this.discharges = JSON.parse(tlist[0]);
+        //let tjson_data_discharge_pre = JSON.parse(tlist[1]);
+                
+        console.log("-----tlist[0]=" + tlist[0]+ "   tlist[1]=" +tlist[1]);
+      });
+    },
+    //出院登记
+    discharge_reg(e) {
+      console.log("操作出院登记=" + e.target.innerText);
+      //入参:pid + "|" + out_mode + "|" + treate_result + "|" + out_dest + "|" + thsp_code + "|" + topcode + "|" + tgc;
+      let tpid = this.adm_reg.pid;
+      let thsp_code = process.env.VUE_APP_HSP_CODE;
+      let tinstr = tpid + "|" + thsp_code + "|" + this.discharge.middle_flag + "|" + this.discharge.out_mode+ "|" + this.discharge.treate_result + "|" + this.discharge.out_dest + "|" + this.topcode;
+      let turl = process.env.VUE_APP_INP_URL + "/admregchkout/" + tinstr + "/" + this.topcode + "/" + this.tgc;
+      fetch_data_api(turl).then(data => {
+        console.log("出院登记 data=" + data);
+       
+      });
+    },
+    //出院结算
+    discharge_commit(e) {
+      console.log("操作=" + e);
+      //入参:tpid + "|" + thsp_code + "|" + middle_flag + "|" + out_mode + "|" + treate_result + "|" + out_dest + "|" + topcode + "|" + tgc;
+      //-- 入参: 住院号|医院编号|是否中途结算|出院方式|治疗结果|出院去向|操作员|TGC
+      let tpid = this.adm_reg.pid;
+      let thsp_code = process.env.VUE_APP_HSP_CODE;      
+      let tinstr = tpid + "|" + thsp_code + "|" + this.discharge.middle_flag + "|" + this.discharge.out_mode+ "|" + this.discharge.treate_result + "|" + this.discharge.out_dest  + "|" + this.topcode;
+      let turl = process.env.VUE_APP_INP_URL + "/dischargecommit/" + tinstr + "/" + this.topcode + "/" + this.tgc;
+      fetch_data_api(turl).then(data => {
+        console.log("出院结算 data=" + data);
+       
+      });
     }
     // ---------------------end methods----------------
   }
